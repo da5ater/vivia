@@ -14,13 +14,9 @@ export default function Page() {
 
   return (
     <>
-      <Authenticated>
-        <UserButton />
-        <Content />
-      </Authenticated>
-      <Unauthenticated>
-        <SignInButton />
-      </Unauthenticated>
+      <UserButton />
+      <Content />
+      <SignInButton />
     </>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
-import { SignUp } from "@clerk/nextjs";
+
+import { SignUpView } from "@/modules/auth/ui/views/signup-view";
 
 const page = () => {
-  return <SignUp />;
+  return <SignUpView />;
 };
 
 export default page;

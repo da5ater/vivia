@@ -44,7 +44,10 @@ export default function RootLayout({
             Your custom Providers component (with themes/convex) is on the inside.
         */}
         <ClerkProvider>
-          <Providers>{children}</Providers>
+          <Providers>
+            {/* 9. Added the AuthGuard component to protect routes */}
+            {children}
+          </Providers>
         </ClerkProvider>
       </body>
     </html>
