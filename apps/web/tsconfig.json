@@ -4,9 +4,15 @@
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@workspace/ui/*": ["../../packages/ui/src/*"],
-      "@workspace/backend/convex/*": ["../../packages/backend/convex/*"]
+      "@/*": [
+        "./*"
+      ],
+      "@workspace/ui/*": [
+        "../../packages/ui/src/*"
+      ],
+      "@workspace/backend/convex/*": [
+        "../../packages/backend/convex/*"
+      ]
     },
     "plugins": [
       {
@@ -15,11 +21,14 @@
     ]
   },
   "include": [
-    "next-env.d.ts",
-    "next.config.ts",
     "**/*.ts",
     "**/*.tsx",
+    "app/.next/types/**/*.ts",
+    "next-env.d.ts",
+    "next.config.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }
