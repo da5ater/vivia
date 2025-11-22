@@ -1,7 +1,20 @@
-import { AuthGuard } from "@/modules/auth/ui/components/auth-guard";
+import { DashboardLayout } from "@/modules/dashboard/ui/layouts/dashboard-layout";
+import { SidebarProvider } from "@workspace/ui/components/sidebar";
+import { cookies } from "next/headers";
+import { DashboardSidebar } from "@/modules/dashboard/ui/components/dashboard-sidebar";
+const Layout = async ({ children }: { children: React.ReactNode }) => {
+  const cookieSTore = await cookies();
+  const sidebarCookie = cookieSTore.get("sidebar-state")?.value === "true";
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
-  return <AuthGuard>{children}</AuthGuard>;
+  return (
+    <DashboardLayout>
+      <SidebarProvider defaultOpen={sidebarCookie}>
+        <DashboardSidebar />
+        {children}
+        <DashboardSidebar />
+      </SidebarProvider>
+    </DashboardLayout>
+  );
 };
 
 export default Layout;
