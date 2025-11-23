@@ -29,6 +29,8 @@ import {
   SidebarRail,
 } from "@workspace/ui/components/sidebar";
 
+import { cn } from "@workspace/ui/lib/utils";
+
 // --- Configuration Data ---
 // Defined outside component to prevent re-creation on every render
 const customerSupportItems = [
@@ -99,6 +101,10 @@ export const DashboardSidebar = () => {
                     asChild
                     isActive={isActive(item.href)}
                     tooltip={item.label}
+                    className={cn(
+                      isActive(item.href) &&
+                        "bg-gradient-to-b from-sidebar-primary to-[#0b63f3]! text-sidebar-primary-foreground! hover:to-[#0b63f3]/90!"
+                    )}
                   >
                     <Link href={item.href}>
                       <item.icon className="size-4 mr-2" />
@@ -122,6 +128,10 @@ export const DashboardSidebar = () => {
                     asChild
                     isActive={isActive(item.href)}
                     tooltip={item.label}
+                    className={cn(
+                      isActive(item.href) &&
+                        "bg-gradient-to-b from-sidebar-primary to-[#0b63f3]! text-sidebar-primary-foreground! hover:to-[#0b63f3]/90!"
+                    )}
                   >
                     <Link href={item.href}>
                       <item.icon className="size-4 mr-2" />
@@ -145,6 +155,10 @@ export const DashboardSidebar = () => {
                     asChild
                     isActive={isActive(item.href)}
                     tooltip={item.label}
+                    className={cn(
+                      isActive(item.href) &&
+                        "bg-gradient-to-b from-sidebar-primary to-[#0b63f3]! text-sidebar-primary-foreground! hover:to-[#0b63f3]/90!"
+                    )}
                   >
                     <Link href={item.href}>
                       <item.icon className="size-4 mr-2" />
