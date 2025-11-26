@@ -19,5 +19,5 @@ export default function Page({ searchParams }: PageProps) {
 
   // --- View Injection ---
   // Pass the unwrapped primitive to the presentation layer.
-  return <WidgetView>""</WidgetView>;
+  return <WidgetView></WidgetView>;
 }

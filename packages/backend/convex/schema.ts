@@ -10,6 +10,25 @@ const schema = defineSchema({
   })
     .index("byEmail", ["email"])
     .index("byCreatedAt", ["createdAt"]),
+
+  contact_sessions: defineTable({
+    name: v.string(),
+    email: v.string(),
+    createdAt: v.number(),
+    metadata: v.optional(
+      v.object({
+        userAgent: v.optional(v.string()),
+        referrer: v.optional(v.string()),
+        source: v.optional(v.string()),
+        language: v.optional(v.string()),
+        platform: v.optional(v.string()),
+        cookieEnabled: v.optional(v.boolean()),
+        currentUrl: v.optional(v.string()),
+      })
+    ),
+  })
+    .index("byEmail", ["email"])
+    .index("byCreatedAt", ["createdAt"]),
 });
 
 export default schema;
