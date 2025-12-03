@@ -15,6 +15,7 @@ const schema = defineSchema({
     name: v.string(),
     email: v.string(),
     createdAt: v.number(),
+    expiresAt: v.number(),
     metadata: v.optional(
       v.object({
         userAgent: v.optional(v.string()),

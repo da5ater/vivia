@@ -7,7 +7,8 @@ import { useAtomValue } from "jotai";
 import { widgetScreenAtom } from "../../atoms/widget-atoms";
 import { WidgetScreen } from "../../types";
 import { JSX } from "react";
-
+import { WidgetErrorScreen } from "../screens/WidgetErrorScreen";
+import { WidgetLoadingScreen } from "../screens/WidgetLoadingScreen";
 interface WidgetViewProps {
   children: React.ReactNode;
 }
@@ -25,8 +26,8 @@ export const WidgetView = ({ children }: WidgetViewProps) => {
 
   const screenComponent: Record<WidgetScreen, JSX.Element> = {
     auth: <WidgetAutScreen />,
-    error: <PlaceHolder name="Error Screen" />,
-    loading: <PlaceHolder name="Loading Screen" />,
+    error: <WidgetErrorScreen />,
+    loading: <WidgetLoadingScreen />,
     selection: <PlaceHolder name="Selection Screen" />,
     voice: <PlaceHolder name="Voice Screen" />,
     inbox: <PlaceHolder name="Inbox Screen" />,

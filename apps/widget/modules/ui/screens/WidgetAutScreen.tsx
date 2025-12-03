@@ -14,8 +14,11 @@ import {
 } from "@workspace/ui/components/form";
 
 import { WidgetHeader } from "@/modules/widget/ui/components/widget-header";
-import { createContactSession } from "../../../../../packages/backend/convex/public/contact_sessions";
-import { use } from "react";
+import { useSetAtom } from "jotai";
+import {
+  contactSessionIdAtom,
+  widgetScreenAtom,
+} from "@/modules/widget/atoms/widget-atoms";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -57,6 +60,15 @@ export const WidgetAutScreen = () => {
       console.error("Error creating contact session:", error);
       // Handle error, e.g., show an error message to the user
     }
+  };
+
+  const setContactSessionId = useSetAtom(contactSessionIdAtom);
+  const setScreen = useSetAtom(widgetScreenAtom);
+
+  const handleCreateSession = async (email: string, name: string) => {
+    const contactSessionId = await createContactSession({ email, name });
+    setContactSessionId(contactSessionId);
+    setScreen("selection");
   };
 
   return (
@@ -114,6 +126,12 @@ export const WidgetAutScreen = () => {
             className="mt-auto w-50 self-center"
             size="lg"
             disabled={form.formState.isSubmitting}
+            onClick={() =>
+              handleCreateSession(
+                form.getValues("email"),
+                form.getValues("name")
+              )
+            }
           >
             Start Chat
           </Button>
