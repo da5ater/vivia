@@ -37,6 +37,8 @@ export const WidgetAutScreen = () => {
       name: "",
     },
   });
+  const setContactSessionId = useSetAtom(contactSessionIdAtom);
+  const setScreen = useSetAtom(widgetScreenAtom);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -56,19 +58,12 @@ export const WidgetAutScreen = () => {
       });
       console.log("Contact session created with ID:", contactSessionId);
       // You can add further actions here, like showing a success message
+      setContactSessionId(contactSessionId);
+      setScreen("selection");
     } catch (error) {
       console.error("Error creating contact session:", error);
       // Handle error, e.g., show an error message to the user
     }
-  };
-
-  const setContactSessionId = useSetAtom(contactSessionIdAtom);
-  const setScreen = useSetAtom(widgetScreenAtom);
-
-  const handleCreateSession = async (email: string, name: string) => {
-    const contactSessionId = await createContactSession({ email, name });
-    setContactSessionId(contactSessionId);
-    setScreen("selection");
   };
 
   return (
@@ -126,12 +121,6 @@ export const WidgetAutScreen = () => {
             className="mt-auto w-50 self-center"
             size="lg"
             disabled={form.formState.isSubmitting}
-            onClick={() =>
-              handleCreateSession(
-                form.getValues("email"),
-                form.getValues("name")
-              )
-            }
           >
             Start Chat
           </Button>
