@@ -14,3 +14,5 @@ export const contactSessionIdAtom =
     "echo_contact_session", // Static key, no Org ID needed
     null
   );
+
+export const conversationIdAtom = atom<Id<"conversations"> | null>(null);

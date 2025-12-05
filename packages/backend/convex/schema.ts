@@ -30,6 +30,20 @@ const schema = defineSchema({
   })
     .index("byEmail", ["email"])
     .index("byCreatedAt", ["createdAt"]),
+
+  conversations: defineTable({
+    contactSessionId: v.id("contact_sessions"),
+    threadId: v.string(),
+    status: v.union(
+      v.literal("unresolved"),
+      v.literal("resolved"),
+      v.literal("escalated")
+    ),
+    createdAt: v.number(),
+  })
+    .index("byContactSessionId", ["contactSessionId"])
+    .index("byStatus", ["status"])
+    .index("byThreadId", ["threadId"]),
 });
 
 export default schema;

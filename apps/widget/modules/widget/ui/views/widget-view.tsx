@@ -1,5 +1,5 @@
 "use client";
-
+import { WidgetChatScreen } from "../screens/WidgetChatScreen";
 import { WidgetAutScreen } from "@/modules/ui/screens/WidgetAutScreen";
 import { WidgetFooter } from "../components/widget-footer";
 import { WidgetHeader } from "../components/widget-header";
@@ -12,6 +12,8 @@ import { WidgetLoadingScreen } from "../screens/WidgetLoadingScreen";
 interface WidgetViewProps {
   children: React.ReactNode;
 }
+
+import { WidgetSelectionScreen } from "../screens/WidgetSelectionScreen";
 
 const PlaceHolder = ({ name }: { name: string }) => {
   return (
@@ -28,10 +30,10 @@ export const WidgetView = ({ children }: WidgetViewProps) => {
     auth: <WidgetAutScreen />,
     error: <WidgetErrorScreen />,
     loading: <WidgetLoadingScreen />,
-    selection: <PlaceHolder name="Selection Screen" />,
+    selection: <WidgetSelectionScreen />,
     voice: <PlaceHolder name="Voice Screen" />,
     inbox: <PlaceHolder name="Inbox Screen" />,
-    chat: <PlaceHolder name="Chat Screen" />,
+    chat: <WidgetChatScreen />,
     contact: <PlaceHolder name="Contact Screen" />,
   };
 

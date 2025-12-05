@@ -6,7 +6,7 @@ import { api } from "@workspace/backend/convex/_generated/api";
 import { WidgetHeader } from "../components/widget-header";
 import { Loader2 } from "lucide-react";
 import {
-  contactSessionAtom,
+  contactSessionIdAtom,
   errorMessageAtom,
   loadingMessageAtom,
   widgetScreenAtom,
@@ -23,7 +23,7 @@ export const WidgetLoadingScreen = () => {
   const setScreen = useSetAtom(widgetScreenAtom);
   const setLoadingMessage = useSetAtom(loadingMessageAtom);
 
-  const contactSessionId = useAtomValue(contactSessionAtom);
+  const contactSessionId = useAtomValue(contactSessionIdAtom);
 
   const useMutationValidateContactSession = useMutation(
     api.public.contact_sessions.validate
