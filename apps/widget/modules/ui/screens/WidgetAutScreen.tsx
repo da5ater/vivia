@@ -15,6 +15,7 @@ import {
 
 import { WidgetHeader } from "@/modules/widget/ui/components/widget-header";
 import { useSetAtom } from "jotai";
+
 import {
   contactSessionIdAtom,
   widgetScreenAtom,

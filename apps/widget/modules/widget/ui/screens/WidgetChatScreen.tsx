@@ -47,6 +47,10 @@ import { useForm } from "react-hook-form";
 
 import { Form, FormField } from "@workspace/ui/components/form";
 
+import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
+import { InfiniteScrollTrigger } from "@workspace/ui/components/InfiniteScrollTrigger";
+import { DiceBearAvatar } from "@workspace/ui/components/DiceBearAvatar";
+
 const formSchema = z.object({
   message: z.string().min(1, "Message is required"),
 });
@@ -105,6 +109,18 @@ export const WidgetChatScreen = () => {
     });
   };
 
+  const { topElementRef, canLoadMore, isLoadingMore } = useInfiniteScroll({
+    status: (messages.status.charAt(0).toLowerCase() +
+      messages.status.slice(1)) as
+      | "canLoadMore"
+      | "loadingMore"
+      | "exhausted"
+      | "loadingFirstPage",
+    loadMore: messages.loadMore,
+    loadSize: 10,
+    observerEnabled: true,
+  });
+
   return (
     <>
       <WidgetHeader className="flex items-center justify-between ">
@@ -121,6 +137,12 @@ export const WidgetChatScreen = () => {
 
       <AIConversation>
         <AIConversationContent>
+          <InfiniteScrollTrigger
+            ref={topElementRef} // Hook attaches here
+            canLoadMore={canLoadMore}
+            isLoadingMore={isLoadingMore}
+            onLoadMore={() => messages.loadMore(10)}
+          />
           {toUIMessages(messages.results ?? []).map((message) => (
             <AIMessage
               key={message.id}
@@ -130,6 +152,15 @@ export const WidgetChatScreen = () => {
                 {/* Renders Markdown response safely */}
                 <AIResponse>{message.text}</AIResponse>
               </AIMessageContent>
+              {message.role === "assistant" && (
+                <DiceBearAvatar
+                  seed="assistant"
+                  // size={32}
+                  imageUrl="/vivia-logo.png" // Using app logo
+                  imageClassName="object-contain p-1"
+                  // badgeImageUrl="/vivia-logo.png" // Small badge
+                />
+              )}
             </AIMessage>
           ))}
         </AIConversationContent>
