@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef } from "react";
 
 export interface UseInfiniteScrollProps {
   // Status states matching the backend/store definitions
-  status: "canLoadMore" | "loadingMore" | "exhausted" | "loadingFirstPage";
+  status: "LoadingFirstPage" | "CanLoadMore" | "LoadingMore" | "Exhausted";
   loadMore: (count: number) => void;
   loadSize?: number;
   observerEnabled?: boolean;
@@ -20,7 +20,7 @@ export const useInfiniteScroll = ({
   const topElementRef = useRef<HTMLDivElement>(null);
 
   const handleLoadMore = useCallback(() => {
-    if (status === "canLoadMore") {
+    if (status === "CanLoadMore") {
       loadMore(loadSize);
     }
   }, [status, loadMore, loadSize]);
@@ -53,9 +53,9 @@ export const useInfiniteScroll = ({
 
   return {
     topElementRef,
-    canLoadMore: status === "canLoadMore",
-    isLoadingMore: status === "loadingMore",
-    isLoadingFirstPage: status === "loadingFirstPage",
-    isExhausted: status === "exhausted",
+    canLoadMore: status === "CanLoadMore",
+    isLoadingMore: status === "LoadingMore",
+    isLoadingFirstPage: status === "LoadingFirstPage",
+    isExhausted: status === "Exhausted",
   };
 };

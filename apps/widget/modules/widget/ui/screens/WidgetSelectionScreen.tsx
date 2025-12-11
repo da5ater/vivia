@@ -13,6 +13,7 @@ import { widgetScreenAtom } from "../../atoms/widget-atoms";
 import { useMutation } from "convex/react";
 import { api } from "@workspace/backend/convex/_generated/api";
 import { useState } from "react";
+import { WidgetFooter } from "../components/widget-footer";
 
 export const WidgetSelectionScreen = () => {
   const setScreen = useSetAtom(widgetScreenAtom);
@@ -49,7 +50,7 @@ export const WidgetSelectionScreen = () => {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full flex-1">
       <WidgetHeader>
         <div className="flex flex-col justify-between gap-y-2 px-2 py-6 font-semibold">
           <p className="text-3xl">we are here to help you</p>
@@ -70,6 +71,8 @@ export const WidgetSelectionScreen = () => {
           <ChevronRightIcon />
         </Button>
       </div>
+
+      <WidgetFooter />
     </div>
   );
 };

@@ -1,8 +1,65 @@
 import { mutation, query } from "../_generated/server.js";
 import { ConvexError, v } from "convex/values";
 import { supportAgent } from "../system/ai/agents/supportAgent.js";
-import { saveMessage } from "@convex-dev/agent";
+import { saveMessage, vMessageDoc } from "@convex-dev/agent";
 import { components } from "../_generated/api.js";
+import { paginationOptsValidator } from "convex/server";
+import { MessageDoc } from "@convex-dev/agent";
+
+export const getMany = query({
+  args: {
+    contactSessionId: v.id("contact_sessions"),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, { contactSessionId, paginationOpts }) => {
+    const session = await ctx.db
+      .query("contact_sessions")
+      .withIndex("by_id", (q) => q.eq("_id", contactSessionId))
+      .unique();
+
+    if (!session || session.expiresAt < Date.now()) {
+      throw new ConvexError({
+        message: "Contact session is invalid or has expired",
+        code: "unauthorized",
+      });
+    }
+
+    const conversations = await ctx.db
+      .query("conversations")
+      .withIndex("byContactSessionId", (q) =>
+        q.eq("contactSessionId", contactSessionId)
+      )
+      .order("desc")
+      .paginate(paginationOpts);
+
+    const conversationWithLastMessage = await Promise.all(
+      conversations.page.map(async (conversation) => {
+        let lastMessage: MessageDoc | null = null;
+
+        const messages = await supportAgent.listMessages(ctx, {
+          threadId: conversation.threadId,
+          paginationOpts: { numItems: 1, cursor: null },
+        });
+
+        if (messages.page.length > 0) {
+          lastMessage = messages.page[0];
+        }
+
+        return {
+          _id: conversation._id,
+          status: conversation.status,
+          threadId: conversation.threadId,
+          lastMessage,
+        };
+      })
+    );
+
+    return {
+      ...conversations,
+      page: conversationWithLastMessage,
+    };
+  },
+});
 
 export const create = mutation({
   args: {

@@ -110,15 +110,10 @@ export const WidgetChatScreen = () => {
   };
 
   const { topElementRef, canLoadMore, isLoadingMore } = useInfiniteScroll({
-    status: (messages.status.charAt(0).toLowerCase() +
-      messages.status.slice(1)) as
-      | "canLoadMore"
-      | "loadingMore"
-      | "exhausted"
-      | "loadingFirstPage",
+    status: messages.status,
     loadMore: messages.loadMore,
-    loadSize: 10,
-    observerEnabled: true,
+    loadSize: 5,
+    observerEnabled: false,
   });
 
   return (

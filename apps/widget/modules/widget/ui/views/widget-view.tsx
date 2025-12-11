@@ -9,6 +9,7 @@ import { WidgetScreen } from "../../types";
 import { JSX } from "react";
 import { WidgetErrorScreen } from "../screens/WidgetErrorScreen";
 import { WidgetLoadingScreen } from "../screens/WidgetLoadingScreen";
+import { WidgetInboxScreen } from "../screens/widgetInboxScreen";
 interface WidgetViewProps {
   children: React.ReactNode;
 }
@@ -32,7 +33,7 @@ export const WidgetView = ({ children }: WidgetViewProps) => {
     loading: <WidgetLoadingScreen />,
     selection: <WidgetSelectionScreen />,
     voice: <PlaceHolder name="Voice Screen" />,
-    inbox: <PlaceHolder name="Inbox Screen" />,
+    inbox: <WidgetInboxScreen />,
     chat: <WidgetChatScreen />,
     contact: <PlaceHolder name="Contact Screen" />,
   };
