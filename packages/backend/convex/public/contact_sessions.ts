@@ -13,6 +13,7 @@ const createArgs = {
       platform: v.optional(v.string()),
       cookieEnabled: v.optional(v.boolean()),
       currentUrl: v.optional(v.string()),
+      timezone: v.string(),
     })
   ),
 };

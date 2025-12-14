@@ -50,6 +50,7 @@ export const WidgetAutScreen = () => {
         language: navigator.language,
         platform: navigator.platform,
         cookieEnabled: navigator.cookieEnabled,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
 
       const contactSessionId = await createContactSession({

@@ -25,6 +25,7 @@ const schema = defineSchema({
         platform: v.optional(v.string()),
         cookieEnabled: v.optional(v.boolean()),
         currentUrl: v.optional(v.string()),
+        timezone: v.optional(v.string()),
       })
     ),
   })

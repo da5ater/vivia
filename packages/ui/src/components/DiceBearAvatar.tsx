@@ -18,7 +18,6 @@ interface DiceBearAvatarProps {
   badgeImageUrl?: string;
   imageClassName?: string;
 }
-
 export const DiceBearAvatar = ({
   seed,
   size = 32,
