@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@workspace/backend/convex/_generated/api";
-import { DashboardSidebar } from "@/modules/dashboard/ui/components/dashboard-sidebar";
+import { DashboardSidebar } from "@/modules/auth/ui/views/dashboard/ui/components/dashboard-sidebar";
 
 export default function Page() {
   const users = useQuery(api.users.getMany);

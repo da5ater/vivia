@@ -24,7 +24,7 @@ import { formatDistanceToNow } from "date-fns";
 import {
   getCountryFlagUrl,
   getCountryNameFromTimzezone,
-} from "../../../../lib/country-utils";
+} from "../../../../../../../lib/country-utils";
 import { DiceBearAvatar } from "@workspace/ui/components/DiceBearAvatar";
 import { cn } from "@workspace/ui/lib/utils";
 import { ConversationStatusIcon } from "@workspace/ui/components/conversation-status-icon";

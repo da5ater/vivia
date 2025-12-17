@@ -1,4 +1,4 @@
-import { ConversationsLayout } from "@/modules/dashboard/ui/layouts/conversations-layout";
+import { ConversationsLayout } from "@/modules/auth/ui/views/dashboard/ui/layouts/conversations-layout";
 import { ReactNode } from "react";
 
 interface DashboardConversationsLayoutProps {

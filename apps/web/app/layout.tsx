@@ -34,10 +34,10 @@ export default function RootLayout({
 }>) {
   return (
     // 6. Kept your <html> tag
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="h-full">
       {/* 7. Kept your <body> tag */}
       <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
+        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased h-full`}
       >
         {/* 8. This is the new, merged wrapper structure.
             ClerkProvider is on the outside.

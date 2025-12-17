@@ -78,3 +78,39 @@ export const getMany = query({
     };
   },
 });
+
+export const getOne = query({
+  args: {
+    conversationId: v.id("conversations"),
+  },
+  handler: async (ctx, { conversationId }) => {
+    const identity = ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError({
+        message: "Unauthorized",
+        code: "unauthorized",
+      });
+    }
+
+    const conversation = await ctx.db.get(conversationId);
+    if (!conversation) {
+      throw new ConvexError({
+        message: "Conversation not found",
+        code: "not_found",
+      });
+    }
+
+    const contactSession = await ctx.db.get(conversation.contactSessionId);
+    if (!contactSession) {
+      throw new ConvexError({
+        message: "Contact session not found",
+        code: "not_found",
+      });
+    }
+
+    return {
+      ...conversation,
+      contactSession,
+    };
+  },
+});

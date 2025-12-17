@@ -34,7 +34,7 @@ import { cn } from "@workspace/ui/lib/utils";
 // --- Configuration Data ---
 // Defined outside component to prevent re-creation on every render
 const customerSupportItems = [
-  { label: "Conversations", href: "/conversation", icon: InboxIcon },
+  { label: "Conversations", href: "/conversations", icon: InboxIcon },
   { label: "Knowledge Base", href: "/files", icon: LibraryBigIcon },
 ];
 
@@ -72,7 +72,7 @@ export const DashboardSidebar = () => {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Home">
-              <Link href="/dashboard" className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2">
                 <Image
                   src="/vivia-logo.png"
                   alt="Logo"
