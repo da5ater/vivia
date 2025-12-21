@@ -3,6 +3,10 @@ import { action, query } from "../_generated/server.js";
 import { internal } from "../_generated/api";
 import { supportAgent } from "../system/ai/agents/supportAgent";
 import { paginationOptsValidator } from "convex/server";
+import { escalateConversation } from "../system/ai/tools/escalateConversation.js";
+import { resolveConversation } from "../system/ai/tools/resolveConversation.js";
+import { components } from "../_generated/api.js";
+import { saveMessage } from "@convex-dev/agent";
 
 export const create = action({
   args: {
@@ -39,13 +43,27 @@ export const create = action({
       throw new ConvexError("Cannot add messages to a resolved conversation");
     }
 
-    await supportAgent.generateText(
-      ctx,
-      {
-        threadId,
-      },
-      { prompt }
-    );
+    const shouldTriggerAgent = conversation.status === "unresolved";
+    if (shouldTriggerAgent) {
+      await supportAgent.generateText(
+        ctx,
+        {
+          threadId,
+        },
+        {
+          prompt,
+          tools: {
+            escalateConversation,
+            resolveConversation,
+          },
+        }
+      );
+    } else {
+      await saveMessage(ctx, components.agent, {
+        threadId: conversation.threadId,
+        prompt: prompt,
+      });
+    }
   },
 });
 

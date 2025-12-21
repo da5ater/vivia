@@ -174,19 +174,22 @@ importers:
     dependencies:
       '@ai-sdk/google':
         specifier: ^2.0.44
-        version: 2.0.44(zod@3.25.76)
+        version: 2.0.44(zod@3.25.67)
       '@convex-dev/agent':
         specifier: ^0.3.2
-        version: 0.3.2(@ai-sdk/provider-utils@3.0.18(zod@3.25.76))(ai@5.0.107(zod@3.25.76))(convex-helpers@0.1.106(@standard-schema/spec@1.0.0)(convex@1.29.3(@clerk/clerk-react@5.57.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3)(zod@3.25.76))(convex@1.29.3(@clerk/clerk-react@5.57.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0))(react@19.2.0)
+        version: 0.3.2(@ai-sdk/provider-utils@3.0.18(zod@3.25.67))(ai@5.0.107(zod@3.25.67))(convex-helpers@0.1.106(@standard-schema/spec@1.0.0)(convex@1.29.3(@clerk/clerk-react@5.57.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3)(zod@3.25.67))(convex@1.29.3(@clerk/clerk-react@5.57.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0))(react@19.2.0)
       ai:
         specifier: ^5.0.107
-        version: 5.0.107(zod@3.25.76)
+        version: 5.0.107(zod@3.25.67)
       convex:
         specifier: ^1.28.2
         version: 1.29.3(@clerk/clerk-react@5.57.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)
       convex-helpers:
         specifier: ^0.1.106
-        version: 0.1.106(@standard-schema/spec@1.0.0)(convex@1.29.3(@clerk/clerk-react@5.57.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3)(zod@3.25.76)
+        version: 0.1.106(@standard-schema/spec@1.0.0)(convex@1.29.3(@clerk/clerk-react@5.57.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3)(zod@3.25.67)
+      zod:
+        specifier: 3.25.67
+        version: 3.25.67
     devDependencies:
       '@types/node':
         specifier: ^20.19.9
@@ -5465,11 +5468,11 @@ snapshots:
       '@vercel/oidc': 3.0.5
       zod: 3.25.76
 
-  '@ai-sdk/google@2.0.44(zod@3.25.76)':
+  '@ai-sdk/google@2.0.44(zod@3.25.67)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.18(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 3.0.18(zod@3.25.67)
+      zod: 3.25.67
 
   '@ai-sdk/provider-utils@3.0.18(zod@3.25.67)':
     dependencies:

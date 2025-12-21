@@ -4,6 +4,8 @@ import { components, internal } from "../_generated/api";
 import { supportAgent } from "../system/ai/agents/supportAgent";
 import { paginationOptsValidator } from "convex/server";
 import { saveMessage } from "@convex-dev/agent";
+import { generateText } from "ai";
+import { google } from "@ai-sdk/google";
 
 export const create = mutation({
   args: {
@@ -63,5 +65,39 @@ export const getMany = query({
     }
 
     return await supportAgent.listMessages(ctx, { threadId, paginationOpts });
+  },
+});
+
+export const enhanceResponse = action({
+  args: {
+    prompt: v.string(),
+    threadId: v.string(),
+  },
+  handler: async (ctx, { prompt, threadId }) => {
+    const identity = ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError({
+        message: "Unauthorized",
+        code: "unauthorized",
+      });
+    }
+    const response = await generateText({
+      // Use provider directly (not Vercel AI Gateway)
+      model: google("gemini-2.5-flash"),
+      messages: [
+        {
+          role: "system",
+          content:
+            "Enhance the operator message to be more professional, clear, and helpful while maintaining their intent and key information.Respnse is headles only the enhanced response ready to be submitted you are a headless tool here no any conversation just the response ",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
+
+    // 3. Return the text directly (Action does not write to DB)
+    return response.text;
   },
 });

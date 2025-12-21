@@ -114,3 +114,35 @@ export const getOne = query({
     };
   },
 });
+
+export const updateStatus = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    status: v.union(
+      v.literal("unresolved"),
+      v.literal("resolved"),
+      v.literal("escalated")
+    ),
+  },
+  handler: async (ctx, { conversationId, status }) => {
+    const identity = ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError({
+        message: "Unauthorized",
+        code: "unauthorized",
+      });
+    }
+
+    const conversation = await ctx.db.get(conversationId);
+    if (!conversation) {
+      throw new ConvexError({
+        message: "Conversation not found",
+        code: "not_found",
+      });
+    }
+
+    await ctx.db.patch(conversationId, {
+      status,
+    });
+  },
+});
