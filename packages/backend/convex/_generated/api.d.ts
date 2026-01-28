@@ -67,6 +67,7 @@ export declare const internal: FilterApi<
 >;
 
 export declare const components: {
+  rag: ComponentApi;
   agent: {
     apiKeys: {
       destroy: FunctionReference<
