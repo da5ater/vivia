@@ -29,6 +29,10 @@ export const create = mutation({
     if (conversation.status === "resolved") {
       throw new ConvexError("Cannot add messages to a resolved conversation");
     }
+    if(conversation.status==="unresolved"){
+      await ctx.db.patch(conversationId, 
+      {status:"escalated"});
+    }
 
     await saveMessage(ctx, components.agent, {
       threadId: conversation.threadId,
