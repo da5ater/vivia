@@ -2,6 +2,8 @@ import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
 import type { StorageActionWriter } from "convex/server";
 import { assert } from "convex-helpers";
+import { Id } from "../_generated/dataModel";
+import { FilePart } from "ai";
 
 // --- AI Models ---
 const AI_MODELS = {
@@ -46,46 +48,40 @@ Your task is to:
 
 // --- Type for arguments ---
 export type ExtractTextContentArgs = {
-  storageId: string; // use string instead of Id<"_storage"> for type safety
+  storageId: Id<"_storage">;
   filename: string;
   bytes?: ArrayBuffer;
   mimeType: string;
 };
 
-// --- Main extraction function ---
 export async function extractTextContent(
   ctx: { storage: StorageActionWriter },
-  Pargs: ExtractTextContentArgs
+  args: ExtractTextContentArgs
 ): Promise<string> {
-  const { storageId, filename, bytes, mimeType } = Pargs;
+  const { storageId, filename, bytes, mimeType } = args;
 
   const url = await ctx.storage.getUrl(storageId);
   assert(url, "Failed to get storage URL");
 
-  const mimeLower = mimeType.toLowerCase();
-
-  // --- Image ---
-  if ((SUPPORTED_IMAGE_TYPES as readonly string[]).includes(mimeType)) {
+  if (SUPPORTED_IMAGE_TYPES.some((type=>type ===mimeType))) {
     return extractImageText(url);
   }
 
-  // --- PDF ---
-  if (mimeLower.includes("pdf")) {
-    return extractPdfText(url);
-  }
+  if (mimeType.toLowerCase().includes("pdf")) {
+  return extractPdfText(url);
+}
 
-  // --- Text / HTML ---
-  if (mimeLower.includes("text")) {
+
+  if (mimeType.toLowerCase().includes("text")) {
     return extractTextFileContent(ctx, storageId, bytes, mimeType);
   }
 
   throw new Error(`Unsupported MIME type: ${mimeType}`);
 }
 
-// --- Extract text from plain or HTML files ---
 async function extractTextFileContent(
   ctx: { storage: StorageActionWriter },
-  storageId: string,
+  storageId: Id<"_storage">,
   bytes?: ArrayBuffer,
   mimeType?: string
 ): Promise<string> {
@@ -98,7 +94,6 @@ async function extractTextFileContent(
 
   const text = new TextDecoder("utf-8").decode(fileBuffer);
 
-  // If not plain text, summarize using AI
   if (mimeType?.toLowerCase() !== "text/plain") {
     const result = await generateText({
       model: AI_MODELS.html,
@@ -122,8 +117,9 @@ async function extractTextFileContent(
   return text;
 }
 
-// --- Extract text from PDF ---
-async function extractPdfText(url: string): Promise<string> {
+async function extractPdfText(
+  url: string
+): Promise<string> {
   const result = await generateText({
     model: AI_MODELS.pdf,
     system: SYSTEM_PROMPTS.pdf,
@@ -148,7 +144,6 @@ async function extractPdfText(url: string): Promise<string> {
   return result.text;
 }
 
-// --- Extract text from images ---
 async function extractImageText(url: string): Promise<string> {
   const result = await generateText({
     model: AI_MODELS.image,
