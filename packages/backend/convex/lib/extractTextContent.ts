@@ -7,9 +7,9 @@ import { FilePart } from "ai";
 
 // --- AI Models ---
 const AI_MODELS = {
-  image: google.chat("gemini-2.5-flash"),
-  pdf: google.chat("gemini-1.5-pro"),
-  html: google.chat("gemini-1.5-flash"),
+  image: google("gemini-1.5-flash"),
+  pdf: google("gemini-1.5-pro"),
+  html: google("gemini-1.5-flash"),
 } as const;
 
 // --- Supported image types ---
@@ -63,13 +63,13 @@ export async function extractTextContent(
   const url = await ctx.storage.getUrl(storageId);
   assert(url, "Failed to get storage URL");
 
-  if (SUPPORTED_IMAGE_TYPES.some((type=>type ===mimeType))) {
+  if (SUPPORTED_IMAGE_TYPES.some((type => type === mimeType))) {
     return extractImageText(url);
   }
 
   if (mimeType.toLowerCase().includes("pdf")) {
-  return extractPdfText(url);
-}
+    return extractPdfText(url);
+  }
 
 
   if (mimeType.toLowerCase().includes("text")) {

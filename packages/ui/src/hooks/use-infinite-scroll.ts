@@ -57,5 +57,6 @@ export const useInfiniteScroll = ({
     isLoadingMore: status === "LoadingMore",
     isLoadingFirstPage: status === "LoadingFirstPage",
     isExhausted: status === "Exhausted",
+    handleLoadMore,
   };
 };

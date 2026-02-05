@@ -1,24 +1,14 @@
 {
   "extends": "@workspace/typescript-config/nextjs.json",
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
+    "types": ["node"],
     "baseUrl": ".",
+    "forceConsistentCasingInFileNames": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@workspace/ui/*": [
-        "../../packages/ui/src/*"
-      ],
-      "@workspace/backend/convex/*": [
-        "../../packages/backend/convex/*"
-      ]
-    },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+      "@/*": ["./*"],
+      "@workspace/ui/*": ["../../packages/ui/src/*"],
+      "@workspace/backend/convex/*": ["../../packages/backend/convex/*"]
+    }
   },
   "include": [
     "**/*.ts",
@@ -28,7 +18,5 @@
     "next.config.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
