@@ -28,6 +28,8 @@ import {
 import { InfiniteScrollTrigger } from "@workspace/ui/components/InfiniteScrollTrigger";
 import { useState } from "react";
 import { UploadDialog } from "../components/upload-dialog";
+import { DeleteFileDialog } from "../components/delete-file-dialog";
+import { PublicFile } from "@workspace/backend/convex/private/files";
 
 export const FilesView = () => {
   const files = usePaginatedQuery(
@@ -48,13 +50,30 @@ export const FilesView = () => {
     loadSize: 10,
   });
 
-  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<PublicFile | null>(null);
+  const handleDeleteClick = (file: PublicFile) => {
+    setSelectedFile(file);
+    setDeleteDialogOpen(true);
+  };
+  const handleFileDelete = () => {
+    setSelectedFile(null);
+    setDeleteDialogOpen(false);
+  };
 
   return (
     <>
+      <DeleteFileDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        file={selectedFile}
+        onDelete={handleFileDelete}
+      />
+
       <UploadDialog
-        onOpenChange={setIsUploadDialogOpen}
-        open={isUploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        open={uploadDialogOpen}
 
       />
       <div className="flex min-h-screen flex-col bg-muted p-8">
@@ -68,7 +87,7 @@ export const FilesView = () => {
 
           <div className="mt-8 rounded-lg border bg-background">
             <div className="flex items-center justify-end border-b px-6 py-4">
-              <Button onClick={() => setIsUploadDialogOpen(true)}>
+              <Button onClick={() => setUploadDialogOpen(true)}>
                 <PlusIcon className="mr-2 h-4 w-4" />
                 Upload Files
               </Button>
@@ -137,7 +156,9 @@ export const FilesView = () => {
                         </DropdownMenuTrigger>
 
                         <DropdownMenuContent>
-                          <DropdownMenuItem className="text-destructive">
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDeleteClick(file)}>
                             <TrashIcon className="mr-2 size-4" />
                             Delete
                           </DropdownMenuItem>
