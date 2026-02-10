@@ -6,6 +6,7 @@ import { paginationOptsValidator } from "convex/server";
 import { saveMessage } from "@convex-dev/agent";
 import { generateText } from "ai";
 import { google } from "@ai-sdk/google";
+import { OPERATOR_MESSAGE_ENHANCEMENT_PROMPT } from "../system/ai/constants.js";
 
 export const create = mutation({
   args: {
@@ -29,9 +30,9 @@ export const create = mutation({
     if (conversation.status === "resolved") {
       throw new ConvexError("Cannot add messages to a resolved conversation");
     }
-    if(conversation.status==="unresolved"){
-      await ctx.db.patch(conversationId, 
-      {status:"escalated"});
+    if (conversation.status === "unresolved") {
+      await ctx.db.patch(conversationId,
+        { status: "escalated" });
     }
 
     await saveMessage(ctx, components.agent, {
@@ -91,8 +92,7 @@ export const enhanceResponse = action({
       messages: [
         {
           role: "system",
-          content:
-            "Enhance the operator message to be more professional, clear, and helpful while maintaining their intent and key information.Respnse is headles only the enhanced response ready to be submitted you are a headless tool here no any conversation just the response ",
+          content: OPERATOR_MESSAGE_ENHANCEMENT_PROMPT,
         },
         {
           role: "user",

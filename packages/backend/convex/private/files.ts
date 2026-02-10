@@ -113,7 +113,7 @@ export const addFile = action({
     let entryId: EntryId;
     let created = false;
 
-    // ✅ Protect rag.add from internal RAG bugs
+
     try {
       const result = await rag.add(ctx, {
         namespace: NAMESPACE,
@@ -155,9 +155,6 @@ export const addFile = action({
   },
 });
 
-/* =========================
-   List Files
-========================= */
 export const list = query({
   args: {
     category: v.optional(v.string()),
@@ -201,9 +198,7 @@ export const list = query({
   },
 });
 
-/* =========================
-   Types
-========================= */
+
 export type PublicFile = {
   id: EntryId;
   name: string;

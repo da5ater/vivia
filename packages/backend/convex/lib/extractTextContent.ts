@@ -3,13 +3,12 @@ import { generateText } from "ai";
 import type { StorageActionWriter } from "convex/server";
 import { assert } from "convex-helpers";
 import { Id } from "../_generated/dataModel";
-import { FilePart } from "ai";
 
 // --- AI Models ---
 const AI_MODELS = {
-  image: google("gemini-1.5-flash"),
-  pdf: google("gemini-1.5-pro"),
-  html: google("gemini-1.5-flash"),
+  image: google("gemini-2.5-flash"),
+  pdf: google("gemini-2.5-flash"),
+  html: google("gemini-2.5-flash"),
 } as const;
 
 // --- Supported image types ---

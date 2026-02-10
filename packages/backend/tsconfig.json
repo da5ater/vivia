@@ -3,10 +3,17 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@workspace/backend/*": ["./*"]
+      "@workspace/backend/*": [
+        "./*"
+      ]
     },
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
