@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "@workspace/ui/components/sonner"
 
 // 1. Kept your monorepo global CSS import
 import "@workspace/ui/globals.css";
@@ -46,6 +47,7 @@ export default function RootLayout({
         <ClerkProvider>
           <Providers>
             {/* 9. Added the AuthGuard component to protect routes */}
+            <Toaster />
             {children}
           </Providers>
         </ClerkProvider>

@@ -32,6 +32,14 @@ const schema = defineSchema({
     .index("byEmail", ["email"])
     .index("byCreatedAt", ["createdAt"]),
 
+  Plugins: defineTable({
+    namespace: v.string(),
+    service: v.union(v.literal("vapi")),
+    secretName: v.string(),
+  })
+    .index("byServiceAndNamespace", ["service", "namespace"])
+    .index("bySecretName", ["secretName", "namespace"]),
+
   conversations: defineTable({
     contactSessionId: v.id("contact_sessions"),
     threadId: v.string(),
