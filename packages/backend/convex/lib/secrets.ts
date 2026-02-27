@@ -9,36 +9,40 @@ import {
 } from "@aws-sdk/client-secrets-manager";
 
 function validateAwsEnv() {
-    if (!process.env.AWS_REGION) {
-        throw new Error("AWS_REGION is missing");
-    }
-
-    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-        throw new Error("AWS credentials are missing");
+    const missing = [];
+    if (!process.env.AWS_REGION) missing.push("AWS_REGION");
+    if (!process.env.AWS_ACCESS_KEY_ID) missing.push("AWS_ACCESS_KEY_ID");
+    if (!process.env.AWS_SECRET_ACCESS_KEY) missing.push("AWS_SECRET_ACCESS_KEY");
+    if (missing.length > 0) {
+        throw new Error(`Missing environment variables: ${missing.join(", ")}`);
     }
 }
 
-export function createSecretsManagerClient(): SecretsManagerClient {
-    validateAwsEnv();
+let _client: SecretsManagerClient | null = null;
 
-    return new SecretsManagerClient({
-        region: process.env.AWS_REGION,
-        credentials: {
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
-        },
-    });
+function getClient(): SecretsManagerClient {
+    if (!_client) {
+        validateAwsEnv();
+        _client = new SecretsManagerClient({
+            region: process.env.AWS_REGION,
+            credentials: {
+                accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
+                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
+            },
+        });
+    }
+    return _client;
 }
 
 export async function validateAwsConnection(): Promise<void> {
-    const client = createSecretsManagerClient();
+    const client = getClient();
     await client.send(new ListSecretsCommand({ MaxResults: 1 }));
 }
 
 export async function getSecretValue(
     secretName: string,
 ): Promise<GetSecretValueCommandOutput> {
-    const client = createSecretsManagerClient();
+    const client = getClient();
     return await client.send(
         new GetSecretValueCommand({ SecretId: secretName }),
     );
@@ -48,13 +52,14 @@ export async function upsertSecret(
     secretName: string,
     secretValue: Record<string, unknown>,
 ): Promise<void> {
-    const client = createSecretsManagerClient();
+    const client = getClient();
+    const secretString = JSON.stringify(secretValue);
 
     try {
         await client.send(
             new CreateSecretCommand({
                 Name: secretName,
-                SecretString: JSON.stringify(secretValue),
+                SecretString: secretString,
             }),
         );
     } catch (error) {
@@ -62,7 +67,7 @@ export async function upsertSecret(
             await client.send(
                 new PutSecretValueCommand({
                     SecretId: secretName,
-                    SecretString: JSON.stringify(secretValue),
+                    SecretString: secretString,
                 }),
             );
         } else {

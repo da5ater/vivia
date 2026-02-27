@@ -1,7 +1,6 @@
 "use client";
 
-// --- Imports ---
-import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
 import {
   CreditCardIcon,
   InboxIcon,
@@ -9,30 +8,29 @@ import {
   LibraryBigIcon,
   Mic,
   PaletteIcon,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-// Import UI primitives from our local shadcn setup
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@workspace/ui/components/sidebar";
 
 import { cn } from "@workspace/ui/lib/utils";
 
-// --- Configuration Data ---
-// Defined outside component to prevent re-creation on every render
 const customerSupportItems = [
   { label: "Conversations", href: "/conversations", icon: InboxIcon },
   { label: "Knowledge Base", href: "/files", icon: LibraryBigIcon },
@@ -48,150 +46,162 @@ const accountItems = [
   { label: "Billing", href: "/billing", icon: CreditCardIcon },
 ];
 
-export const DashboardSidebar = () => {
-  // --- Hooks ---
-  const pathname = usePathname();
+const NavSection = ({
+  label,
+  items,
+  isActive,
+}: {
+  label: string;
+  items: { label: string; href: string; icon: any }[];
+  isActive: (href: string) => boolean;
+}) => (
+  <SidebarGroup className="p-0 mb-1">
+    <p className="text-[9.5px] font-semibold tracking-[0.14em] uppercase text-white/20 px-2.5 mb-1 group-data-[collapsible=icon]:hidden">
+      {label}
+    </p>
+    <SidebarGroupContent>
+      <SidebarMenu className="gap-0.5">
+        {items.map((item) => {
+          const active = isActive(item.href);
+          return (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                isActive={active}
+                tooltip={item.label}
+                className={cn(
+                  "relative h-9 rounded-[9px] text-[13px] font-medium transition-all duration-150 border border-transparent",
+                  "text-white/42 hover:text-white/78 hover:bg-white/[0.04]",
+                  active &&
+                  "text-white! bg-gradient-to-r from-indigo-500/18 to-blue-500/10! border-indigo-500/20!"
+                )}
+              >
+                <Link href={item.href} className="flex items-center gap-2.5 px-2.5">
+                  {active && (
+                    <span
+                      className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-gradient-to-b from-indigo-400 to-blue-400"
+                      style={{ boxShadow: "0 0 10px rgba(129,140,248,0.7)" }}
+                    />
+                  )}
+                  <item.icon
+                    className={cn(
+                      "size-4 shrink-0 transition-all duration-150",
+                      active ? "text-indigo-300" : "text-white/30 group-hover:text-white/60"
+                    )}
+                    style={active ? { filter: "drop-shadow(0 0 5px rgba(129,140,248,0.5))" } : {}}
+                  />
+                  <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          );
+        })}
+      </SidebarMenu>
+    </SidebarGroupContent>
+  </SidebarGroup>
+);
 
-  // --- Active State Logic ---
-  // Determines if a menu item should be highlighted based on current URL
+export const DashboardSidebar = () => {
+  const pathname = usePathname();
+  const { toggleSidebar, open } = useSidebar();
+
   const isActive = (url: string) => {
-    if (url === "/") {
-      return pathname === "/";
-    }
+    if (url === "/") return pathname === "/";
     return pathname.startsWith(url);
   };
 
   return (
-    // --- Sidebar Container ---
-    // 'collapsible="icon"' enables the behavior where it shrinks to icons only
-    <Sidebar className="group border-r" collapsible="icon">
+    <Sidebar
+      collapsible="icon"
+      style={{
+        background: "linear-gradient(160deg, #0f0f17 0%, #0a0a10 100%)",
+        borderRight: "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
       <SidebarRail />
 
-      {/* --- Header Section --- */}
-      <SidebarHeader>
+      {/* Ambient glow */}
+      <div
+        className="absolute top-0 left-0 w-48 h-48 pointer-events-none z-0"
+        style={{
+          background: "radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%)",
+        }}
+      />
+
+      {/* Header */}
+      <SidebarHeader className="px-3.5 pt-5 pb-4 relative z-10">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Home">
-              <Link href="/" className="flex items-center gap-2">
-                <Image
-                  src="/vivia-logo.png"
-                  alt="Logo"
-                  width={32}
-                  height={32}
-                  className="rounded-md"
-                />
-                <span className="font-bold text-lg">MyApp</span>
-              </Link>
-            </SidebarMenuButton>
+            <div className="flex items-center justify-between gap-2">
+              {/* Logo */}
+              <SidebarMenuButton
+                asChild
+                tooltip="Home"
+                className="h-auto! hover:bg-transparent! p-0! flex-1!"
+              >
+                <Link href="/" className="flex items-center gap-2.5">
+                  <div
+                    className="flex items-center justify-center size-[34px] rounded-[10px] shrink-0"
+                    style={{
+                      background: "linear-gradient(135deg, #6366f1 0%, #3b82f6 100%)",
+                      boxShadow: "0 0 0 1px rgba(99,102,241,0.3), 0 4px 16px rgba(99,102,241,0.25)",
+                    }}
+                  >
+                    <Image src="/vivia-logo.png" alt="Logo" width={20} height={20} className="rounded-md" />
+                  </div>
+                  <div className="group-data-[collapsible=icon]:hidden">
+                    <p className="text-[13px] font-semibold text-white/92 tracking-tight leading-none">MyApp</p>
+                    <p className="text-[10px] text-white/25 mt-0.5 tracking-wide">Workspace</p>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+
+              {/* Bare arrow — no box, no border, hidden when collapsed */}
+              <button
+                onClick={toggleSidebar}
+                className="group-data-[collapsible=icon]:hidden text-white/25 hover:text-white/70 transition-colors duration-150 p-1 shrink-0"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
-      {/* --- Main Content Groups --- */}
-      <SidebarContent>
-        {/* Group 1: Customer Support */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Customer Support</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {customerSupportItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  {/* asChild allows the Link to receive styles from SidebarMenuButton */}
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.href)}
-                    tooltip={item.label}
-                    className={cn(
-                      isActive(item.href) &&
-                        "bg-gradient-to-b from-sidebar-primary to-[#0b63f3]! text-sidebar-primary-foreground! hover:to-[#0b63f3]/90!"
-                    )}
-                  >
-                    <Link href={item.href}>
-                      <item.icon className="size-4 mr-2" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+      {/* Gradient divider under header only */}
+      <div
+        className="mx-3.5 mb-3.5 h-px"
+        style={{
+          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+        }}
+      />
 
-        {/* Group 2: Configuration */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Configuration</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {configurationItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.href)}
-                    tooltip={item.label}
-                    className={cn(
-                      isActive(item.href) &&
-                        "bg-gradient-to-b from-sidebar-primary to-[#0b63f3]! text-sidebar-primary-foreground! hover:to-[#0b63f3]/90!"
-                    )}
-                  >
-                    <Link href={item.href}>
-                      <item.icon className="size-4 mr-2" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Group 3: Account */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {accountItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.href)}
-                    tooltip={item.label}
-                    className={cn(
-                      isActive(item.href) &&
-                        "bg-gradient-to-b from-sidebar-primary to-[#0b63f3]! text-sidebar-primary-foreground! hover:to-[#0b63f3]/90!"
-                    )}
-                  >
-                    <Link href={item.href}>
-                      <item.icon className="size-4 mr-2" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+      {/* Nav — no dividers between sections */}
+      <SidebarContent className="px-2 gap-0 relative z-10">
+        <NavSection label="Support" items={customerSupportItems} isActive={isActive} />
+        <NavSection label="Configuration" items={configurationItems} isActive={isActive} />
+        <NavSection label="Account" items={accountItems} isActive={isActive} />
       </SidebarContent>
 
-      {/* --- Footer & Clerk Integration --- */}
-      <SidebarFooter>
+      {/* Footer */}
+      <SidebarFooter
+        className="px-2 py-3 relative z-10"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+      >
         <SidebarMenu>
           <SidebarMenuItem>
             <UserButton
               showName
-              // --- Magic String Styling ---
-              // We use `appearance` to inject Tailwind classes into Clerk's iframe/components.
-              // The `group-data-[collapsible=icon]` selector detects if the parent
-              // Sidebar is collapsed. If so, we hide the name and adjust padding/size.
               appearance={{
                 elements: {
-                  rootBox: "w-full! h-8!",
+                  rootBox: "w-full! h-[42px]!",
                   userButtonTrigger:
-                    "w-full! p-2! hover:bg-sidebar-accent! hover:text-sidebar-accent-foreground! group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2!",
+                    "w-full! px-2.5! py-2! rounded-[9px]! border border-transparent hover:bg-white/[0.04]! hover:border-white/[0.06]! group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:p-1.5! transition-all! duration-150!",
                   userButtonBox:
-                    "w-full! flex-row-reverse! justify-end! gap-2! group-data-[collapsible=icon]:justify-center! text-sidebar-foreground!",
+                    "w-full! flex-row-reverse! justify-end! gap-2.5! group-data-[collapsible=icon]:justify-center!",
                   userButtonOuterIdentifier:
-                    "pl-0! group-data-[collapsible=icon]:hidden!",
-                  avatarBox: "size-4!",
+                    "pl-0! text-[12px]! font-medium! text-white/65! group-data-[collapsible=icon]:hidden!",
+                  avatarBox: "size-[26px]! ring-1! ring-indigo-500/30!",
                 },
               }}
             />
