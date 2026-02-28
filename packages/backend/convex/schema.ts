@@ -2,6 +2,19 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 const schema = defineSchema({
+
+  widgetSettings: defineTable({
+    greetMessage: v.string(),
+    defaultSuggestions: v.object({
+      suggestion1: v.string(),
+      suggestion2: v.string(),
+      suggestion3: v.string(),
+    }),
+    vapiSettings: v.object({
+      assistantId: v.optional(v.string()),
+      phoneNumber: v.optional(v.string()),
+    }),
+  }),
   users: defineTable({
     name: v.string(),
     email: v.string(),
