@@ -1,21 +1,24 @@
 "use client";
-
+import { AISuggestion, AISuggestions } from "@workspace/ui/components/ai/suggestion";
+import { useMemo } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useAction, useQuery } from "convex/react";
+import { api } from "@workspace/backend/convex/_generated/api";
+
 import { WidgetHeader } from "../components/widget-header";
 import { Button } from "@workspace/ui/components/button";
-import { ArrowLeft, ArrowLeftIcon, MenuIcon } from "lucide-react";
+import { ArrowLeftIcon, MenuIcon } from "lucide-react";
+
 import {
   conversationIdAtom,
   contactSessionIdAtom,
   widgetScreenAtom,
+  widgetSettingsAtom,
 } from "../../atoms/widget-atoms";
-import { useAction, useQuery } from "convex/react";
-import { api } from "@workspace/backend/convex/_generated/api";
 
 import {
   AIConversation,
   AIConversationContent,
-  AIConversationScrollButton,
 } from "@workspace/ui/components/ai/conversation";
 
 import {
@@ -28,27 +31,21 @@ import {
 
 import {
   AIMessage,
-  AIMessageAvatar,
   AIMessageContent,
 } from "@workspace/ui/components/ai/message";
-
-import {
-  AISuggestions,
-  AISuggestion,
-} from "@workspace/ui/components/ai/suggestion";
 
 import { AIResponse } from "@workspace/ui/components/ai/response";
 
 import { useThreadMessages, toUIMessages } from "@convex-dev/agent/react";
-import z from "zod";
-import { create } from "../../../../../../packages/backend/convex/public/conversations";
+
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-
 import { Form, FormField } from "@workspace/ui/components/form";
 
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
 import { InfiniteScrollTrigger } from "@workspace/ui/components/InfiniteScrollTrigger";
+
 import { DiceBearAvatar } from "@workspace/ui/components/DiceBearAvatar";
 
 const formSchema = z.object({
@@ -56,32 +53,33 @@ const formSchema = z.object({
 });
 
 export const WidgetChatScreen = () => {
+  const widgetSettings = useAtomValue(widgetSettingsAtom);
   const conversationId = useAtomValue(conversationIdAtom);
   const contactSessionId = useAtomValue(contactSessionIdAtom);
-  const conversation = useQuery(
-    api.public.conversations.getOne,
-    conversationId && contactSessionId
-      ? {
-          conversationId,
-          contactSessionId,
-        }
-      : "skip"
-  );
 
   const setScreen = useSetAtom(widgetScreenAtom);
   const setConversationId = useSetAtom(conversationIdAtom);
 
+  const conversation = useQuery(
+    api.public.conversations.getOne,
+    conversationId && contactSessionId
+      ? { conversationId, contactSessionId }
+      : "skip"
+  );
+
+  const threadId = conversation?.threadId;
+
+  const suggestions = useMemo(() => {
+    const vals = Object.values(widgetSettings?.defaultSuggestions ?? {});
+    return vals.filter((s): s is string => typeof s === "string" && s.trim().length > 0);
+  }, [widgetSettings?.defaultSuggestions]);
+
   const messages = useThreadMessages(
     api.public.messages.getMany,
-    conversation?.threadId && contactSessionId
-      ? {
-          threadId: conversation.threadId,
-          contactSessionId,
-        }
+    threadId && contactSessionId
+      ? { threadId, contactSessionId }
       : "skip",
-    {
-      initialNumItems: 50,
-    }
+    { initialNumItems: 50 }
   );
 
   const handleBackToChat = () => {
@@ -90,20 +88,20 @@ export const WidgetChatScreen = () => {
   };
 
   const createdMessage = useAction(api.public.messages.create);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      message: "",
-    },
+    defaultValues: { message: "" },
+    mode: "onChange",
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!conversationId || !contactSessionId) return;
+    if (!threadId || !contactSessionId) return;
 
     form.reset();
 
     await createdMessage({
-      threadId: conversation?.threadId!,
+      threadId,
       contactSessionId,
       prompt: values.message,
     });
@@ -118,8 +116,8 @@ export const WidgetChatScreen = () => {
 
   return (
     <>
-      <WidgetHeader className="flex items-center justify-between ">
-        <div className="flex items-center gap-x-2 ">
+      <WidgetHeader className="flex items-center justify-between">
+        <div className="flex items-center gap-x-2">
           <Button size="icon" variant="transparent" onClick={handleBackToChat}>
             <ArrowLeftIcon />
             <p>Chat</p>
@@ -133,35 +131,60 @@ export const WidgetChatScreen = () => {
       <AIConversation>
         <AIConversationContent>
           <InfiniteScrollTrigger
-            ref={topElementRef} // Hook attaches here
+            ref={topElementRef}
             canLoadMore={canLoadMore}
             isLoadingMore={isLoadingMore}
             onLoadMore={() => messages.loadMore(10)}
           />
+
           {toUIMessages(messages.results ?? []).map((message) => (
             <AIMessage
               key={message.id}
               from={message.role === "user" ? "user" : "assistant"}
             >
               <AIMessageContent>
-                {/* Renders Markdown response safely */}
                 <AIResponse>{message.text}</AIResponse>
               </AIMessageContent>
+
               {message.role === "assistant" && (
                 <DiceBearAvatar
                   seed="assistant"
-                  // size={32}
-                  imageUrl="/vivia-logo.png" // Using app logo
+                  imageUrl="/vivia-logo.png"
                   imageClassName="object-contain p-1"
-                  // badgeImageUrl="/vivia-logo.png" // Small badge
                 />
               )}
             </AIMessage>
           ))}
         </AIConversationContent>
       </AIConversation>
+      {/*Loading Suggestions*/}
+      {toUIMessages(messages.results ?? []).length === 1 && (
+        <AISuggestions className="flex w-full flex-col items-end p-2">
+          {suggestions.map((suggestion) => {
+            if (!suggestion) {
+              return null
 
-      {/* Form Section */}
+            }
+            return (
+              <AISuggestion
+                key={suggestion}
+                onClick={() => {
+                  form.setValue("message", suggestion, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  });
+                  form.handleSubmit(onSubmit)();
+                }}
+                suggestion={suggestion}
+              />
+            )
+          }
+
+          )}
+        </AISuggestions>
+      )}
+
       <Form {...form}>
         <AIInput
           onSubmit={form.handleSubmit(onSubmit)}
@@ -173,8 +196,7 @@ export const WidgetChatScreen = () => {
             name="message"
             render={({ field }) => (
               <AIInputTextarea
-                {...field} //not so sure about this spread
-                onChange={field.onChange}
+                {...field}
                 placeholder={
                   conversation?.status === "resolved"
                     ? "This conversation has been resolved"
@@ -182,22 +204,19 @@ export const WidgetChatScreen = () => {
                 }
                 disabled={conversation?.status === "resolved"}
                 onKeyDown={(e) => {
-                  // Submit on Enter (without Shift)
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     form.handleSubmit(onSubmit)();
                   }
                 }}
-                value={field.value}
               />
             )}
           />
+
           <AIInputToolbar>
             <AIInputTools>
               <AIInputSubmit
-                disabled={
-                  !form.formState.isValid || conversation?.status === "resolved"
-                }
+                disabled={!form.formState.isValid || conversation?.status === "resolved"}
                 status="ready"
                 type="submit"
               />
