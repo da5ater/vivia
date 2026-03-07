@@ -15,6 +15,7 @@ interface WidgetViewProps {
 }
 
 import { WidgetSelectionScreen } from "../screens/WidgetSelectionScreen";
+import { WidgetVoiceScreen } from "../screens/Widget-Voice-Screen";
 
 const PlaceHolder = ({ name }: { name: string }) => {
   return (
@@ -32,7 +33,7 @@ export const WidgetView = ({ children }: WidgetViewProps) => {
     error: <WidgetErrorScreen />,
     loading: <WidgetLoadingScreen />,
     selection: <WidgetSelectionScreen />,
-    voice: <PlaceHolder name="Voice Screen" />,
+    voice: <WidgetVoiceScreen />,
     inbox: <WidgetInboxScreen />,
     chat: <WidgetChatScreen />,
     contact: <PlaceHolder name="Contact Screen" />,

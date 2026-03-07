@@ -8,9 +8,6 @@ importers:
 
   .:
     devDependencies:
-      '@types/minimatch':
-        specifier: ^6.0.0
-        version: 6.0.0
       '@workspace/eslint-config':
         specifier: workspace:*
         version: link:packages/eslint-config
@@ -215,9 +212,6 @@ importers:
         specifier: 3.25.67
         version: 3.25.67
     devDependencies:
-      '@types/minimatch':
-        specifier: ^6.0.0
-        version: 6.0.0
       '@types/node':
         specifier: ^20.19.9
         version: 20.19.25

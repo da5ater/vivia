@@ -40,7 +40,7 @@ export async function validateAwsConnection(): Promise<void> {
 }
 
 export async function getSecretValue(
-    secretName: string,
+    ctx: unknown, secretName: string,
 ): Promise<GetSecretValueCommandOutput> {
     const client = getClient();
     return await client.send(

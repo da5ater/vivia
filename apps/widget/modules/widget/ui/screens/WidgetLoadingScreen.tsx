@@ -11,8 +11,9 @@ import {
   loadingMessageAtom,
   widgetScreenAtom,
   widgetSettingsAtom,
+  vapiSecretsAtom
 } from "../../atoms/widget-atoms";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 
 type InitStep = "session" | "settings" | "vapi" | "done";
 
@@ -24,6 +25,7 @@ export const WidgetLoadingScreen = () => {
   const setScreen = useSetAtom(widgetScreenAtom);
   const setLoadingMessage = useSetAtom(loadingMessageAtom);
   const setWidgetSettings = useSetAtom(widgetSettingsAtom);
+  const setVapiSecrets = useSetAtom(vapiSecretsAtom);
 
   const contactSessionId = useAtomValue(contactSessionIdAtom);
 
@@ -80,11 +82,36 @@ export const WidgetLoadingScreen = () => {
 
     // widgetSettings is now either object or null
     setWidgetSettings(widgetSettings);
-    setStep("done");
+    setStep("vapi");
     setLoadingMessage(null);
   }, [step, widgetSettings, setWidgetSettings, setLoadingMessage]);
 
-  // 3) Move to next screen
+
+  //Load vapi
+  const getVapiSecrets = useAction(api.public.secrets.getVapiSecrets)
+
+  useEffect(() => {
+    if (step !== "vapi") {
+      return
+    }
+    setLoadingMessage("Loading voice Features");
+    getVapiSecrets({}).then((secrets) => {
+      setVapiSecrets(secrets);
+      setStep("done")
+    })
+      .catch(() => {
+        setVapiSecrets(null)
+      })
+      .finally(() => {
+        setStep("done")
+      })
+  }, [step,
+    getVapiSecrets,
+    setVapiSecrets,
+    setStep,
+    setLoadingMessage
+  ])
+
   useEffect(() => {
     if (step !== "done") return;
     setScreen(sessionValid ? "selection" : "auth");

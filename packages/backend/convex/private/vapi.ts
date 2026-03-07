@@ -29,7 +29,7 @@ export const getAssistants = action({
         }
 
         const secretName = `tenant/default/vapi/${plugin.secretName}`;
-        const secretValue = await getSecretValue(secretName);
+        const secretValue = await getSecretValue(ctx, secretName);
         const secretData = parseSecretString<{
             privateApiKey: string;
             publicApiKey: string;
@@ -83,7 +83,7 @@ export const getPhoneNumbers = action({
         }
 
         const secretName = `tenant/default/vapi/${plugin.secretName}`;
-        const secretValue = await getSecretValue(secretName);
+        const secretValue = await getSecretValue(ctx, secretName);
         const secretData = parseSecretString<{
             privateApiKey: string;
             publicApiKey: string;
