@@ -127,10 +127,11 @@ export const VapiFormFields = ({ form }: VapiFormFieldsProps) => {
                                     <SelectItem value="none">None</SelectItem>
 
                                     {phoneNumbers?.map((phoneNumber) => {
-                                        const number = phoneNumber.number?.trim() || "Unknown number";
+                                        const number = phoneNumber.number?.trim();
+                                        if (!number) return null; // Only allow valid numbers to be saved
                                         const label = phoneNumber.name?.trim() || "No label";
                                         return (
-                                            <SelectItem key={phoneNumber.id} value={phoneNumber.id}>
+                                            <SelectItem key={phoneNumber.id} value={number}>
                                                 {number} • {label}
                                             </SelectItem>
                                         );

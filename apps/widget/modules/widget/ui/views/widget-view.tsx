@@ -16,6 +16,7 @@ interface WidgetViewProps {
 
 import { WidgetSelectionScreen } from "../screens/WidgetSelectionScreen";
 import { WidgetVoiceScreen } from "../screens/Widget-Voice-Screen";
+import { WidgetContactScreen } from "../screens/Widget-Contact-Screen";
 
 const PlaceHolder = ({ name }: { name: string }) => {
   return (
@@ -36,11 +37,11 @@ export const WidgetView = ({ children }: WidgetViewProps) => {
     voice: <WidgetVoiceScreen />,
     inbox: <WidgetInboxScreen />,
     chat: <WidgetChatScreen />,
-    contact: <PlaceHolder name="Contact Screen" />,
+    contact: <WidgetContactScreen />,
   };
 
   return (
-    <main className="min-h-screen min-w-screen flex h-full w-full flex-col overflow-hidden rounded-xl border bg-background">
+    <main className="flex h-full w-full flex-col overflow-hidden rounded-xl border bg-background">
       {screenComponent[screen]}
     </main>
   );
