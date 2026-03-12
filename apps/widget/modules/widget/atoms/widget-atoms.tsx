@@ -1,9 +1,9 @@
 import { atom } from "jotai";
 import { WidgetScreen } from "../types";
 import { atomWithStorage } from "jotai/utils";
-import { Id } from "@workspace/backend/convex/_generated/dataModel";
+import { Doc, Id } from "@workspace/backend/convex/_generated/dataModel";
 
-export const widgetScreenAtom = atom<WidgetScreen>("auth");
+export const widgetScreenAtom = atom<WidgetScreen>("loading");
 
 export const errorMessageAtom = atom<string | null>(null);
 
@@ -16,3 +16,10 @@ export const contactSessionIdAtom =
   );
 
 export const conversationIdAtom = atom<Id<"conversations"> | null>(null);
+
+export const widgetSettingsAtom = atom<Doc<"widgetSettings"> | null>(null);
+export const vapiSecretsAtom = atom<{
+  publicApiKey: string;
+} | null>(null);
+
+export const hasVapiSecretsAtom = atom((get) => get(vapiSecretsAtom) !== null)

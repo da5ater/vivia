@@ -5,10 +5,12 @@ import {
   errorMessageAtom,
   contactSessionIdAtom,
   conversationIdAtom,
+  widgetSettingsAtom,
+  hasVapiSecretsAtom,
 } from "../../atoms/widget-atoms";
 import { WidgetHeader } from "../components/widget-header";
 import { Button } from "@workspace/ui/components/button";
-import { ChevronRightIcon, MessageSquareTextIcon } from "lucide-react";
+import { ChevronRightIcon, MessageSquareTextIcon, MicIcon, PhoneIcon } from "lucide-react";
 import { widgetScreenAtom } from "../../atoms/widget-atoms";
 import { useMutation } from "convex/react";
 import { api } from "@workspace/backend/convex/_generated/api";
@@ -22,6 +24,8 @@ export const WidgetSelectionScreen = () => {
   const createConversation = useMutation(api.public.conversations.create);
 
   const [isPending, setIsPending] = useState(false);
+  const widgetSettings = useAtomValue(widgetSettingsAtom);
+  const hasVapiSecrets = useAtomValue(hasVapiSecretsAtom);
 
   const setConversationId = useSetAtom(conversationIdAtom);
 
@@ -70,6 +74,32 @@ export const WidgetSelectionScreen = () => {
           </div>
           <ChevronRightIcon />
         </Button>
+        {hasVapiSecrets && widgetSettings?.vapiSettings.assistantId && (
+          <Button
+            className="h-16 w-full justify-between"
+            variant="outline"
+            onClick={() => setScreen("voice")}
+          >
+            <div className="flex items-center gap-x-2">
+              <MicIcon className="h-6 w-6" />
+              <span className="text-lg font-medium">Start a Voice Call</span>
+            </div>
+            <ChevronRightIcon />
+          </Button>
+        )}
+        {hasVapiSecrets && widgetSettings?.vapiSettings.phoneNumber && (
+          <Button
+            className="h-16 w-full justify-between"
+            variant="outline"
+            onClick={() => setScreen("contact")}
+          >
+            <div className="flex items-center gap-x-2">
+              <PhoneIcon className="h-6 w-6" />
+              <span className="text-lg font-medium">Call us</span>
+            </div>
+            <ChevronRightIcon />
+          </Button>
+        )}
       </div>
 
       <WidgetFooter />

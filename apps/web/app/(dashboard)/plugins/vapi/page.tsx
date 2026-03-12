@@ -1,4 +1,9 @@
+"use client"; // ← MUST be here
+
+import { VapiView } from "@/modules/Plugins/ui/views/vapi-view";
+
 const VapiPage = () => {
-  return <div>Vapi Page</div>;
+  return <VapiView />;
 };
+
 export default VapiPage;

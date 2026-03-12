@@ -74,7 +74,11 @@ export const create = mutation({
     if (session.expiresAt < now) {
       throw new ConvexError("Contact session has expired");
     }
-
+    const widgetSettings = await ctx.db.query("widgetSettings")
+      .first();
+    if (!widgetSettings) {
+      throw new ConvexError("Widget settings not found");
+    }
     const { threadId } = await supportAgent.createThread(ctx, {
       userId: contactSessionId.toString(),
     });
@@ -84,7 +88,7 @@ export const create = mutation({
       message: {
         // <--- You must nest 'role' and 'content' inside 'message'
         role: "assistant",
-        content: "Hello, how can I help you today?",
+        content: widgetSettings?.greetMessage || "Hello, how can I help you today?",
       },
     });
 

@@ -19,6 +19,7 @@
     "@workspace/backend": "workspace:*",
     "@workspace/math": "workspace:*",
     "@workspace/ui": "workspace:*",
+    "bowser": "^2.14.1",
     "convex": "^1.28.2",
     "countries-and-timezones": "^3.8.0",
     "date-fns": "^4.1.0",
@@ -29,6 +30,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "7.66.1",
+    "sonner": "^2.0.7",
     "zod": "3.25.67"
   },
   "devDependencies": {

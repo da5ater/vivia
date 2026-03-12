@@ -1,6 +1,10 @@
 import { google } from "@ai-sdk/google";
 import { Agent } from "@convex-dev/agent";
 import { components } from "../../../_generated/api";
+import { escalateConversation } from "../tools/escalateConversation";
+import { resolveConversation } from "../tools/resolveConversation";
+import { search } from "../tools/search";
+import { SUPPORT_AGENT_PROMPT } from "../constants";
 
 // Define the agent
 export const supportAgent = new Agent(components.agent, {
@@ -10,5 +14,10 @@ export const supportAgent = new Agent(components.agent, {
   languageModel: google("gemini-2.5-flash"),
 
   // Initial System Prompt
-  instructions: `You are a customer support agent.Use "resolveConversation" tool to resolve the conversation when the customer's issue has been addressed. Use "escalateConversation" tool to escalate the conversation to a human agent when you are unable to assist the customer effectively or user requests escalation or requests a human agent.`,
+  instructions: SUPPORT_AGENT_PROMPT,
+  tools: {
+    escalateConversation,
+    resolveConversation,
+    search,
+  },
 });
