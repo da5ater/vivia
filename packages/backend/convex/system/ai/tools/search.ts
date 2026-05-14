@@ -1,6 +1,7 @@
 import { getModel } from "../models";
 import { createTool } from "@convex-dev/agent";
 import { generateText } from "ai";
+import type { LanguageModel } from "ai";
 import z from "zod";
 import { internal } from "../../../_generated/api";
 import { supportAgent } from "../agents/supportAgent";
@@ -45,7 +46,7 @@ export const search = createTool({
         Here is the context:${searchResults.text}`;
 
         const response = await generateText({
-            model: getModel("interpreter"),
+            model: getModel("interpreter") as LanguageModel,
             messages: [
                 {
                     role: "system",
