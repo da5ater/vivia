@@ -1,3 +1,5 @@
+"use client";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,12 +16,16 @@ import {
 } from "@workspace/ui/components/form";
 
 import { WidgetHeader } from "@/modules/widget/ui/components/widget-header";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
+import { useParams } from "next/navigation";
 
 import {
   contactSessionIdAtom,
+  conversationIdAtom,
   widgetScreenAtom,
+  widgetSettingsAtom,
 } from "@/modules/widget/atoms/widget-atoms";
+import { formatViviaOrganizationName } from "@/modules/widget/lib/branding";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -31,6 +37,10 @@ export const WidgetAutScreen = () => {
     api.public.contact_sessions.createContactSession
   );
 
+  // Get slug from the URL path, e.g. /vivia-ahmed -> slug = "vivia-ahmed".
+  const params = useParams();
+  const slug = params?.slug as string;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,8 +48,11 @@ export const WidgetAutScreen = () => {
       name: "",
     },
   });
+
   const setContactSessionId = useSetAtom(contactSessionIdAtom);
+  const setConversationId = useSetAtom(conversationIdAtom);
   const setScreen = useSetAtom(widgetScreenAtom);
+  const widgetSettings = useAtomValue(widgetSettingsAtom);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -56,15 +69,16 @@ export const WidgetAutScreen = () => {
       const contactSessionId = await createContactSession({
         name: values.name,
         email: values.email,
+        slug,
         metadata,
       });
+
       console.log("Contact session created with ID:", contactSessionId);
-      // You can add further actions here, like showing a success message
       setContactSessionId(contactSessionId);
+      setConversationId(null);
       setScreen("selection");
     } catch (error) {
       console.error("Error creating contact session:", error);
-      // Handle error, e.g., show an error message to the user
     }
   };
 
@@ -72,8 +86,8 @@ export const WidgetAutScreen = () => {
     <div className="flex flex-col h-full">
       <WidgetHeader>
         <div className="flex flex-col justify-between gap-y-2 px-2 py-6 font-semibold">
-          <p className="text-3xl">we are here to help you</p>
-          <p className="text-lg">lets get started</p>
+          <p className="text-3xl">{formatViviaOrganizationName(widgetSettings?.organizationName)}</p>
+          <p className="text-lg">Tell us a little about you so we can help better.</p>
         </div>
       </WidgetHeader>
 
@@ -89,7 +103,7 @@ export const WidgetAutScreen = () => {
               <FormItem>
                 <FormControl>
                   <Input
-                    placeholder="Your Name"
+                    placeholder="Your name"
                     type="text"
                     className="h-10 bg-background"
                     {...field}
@@ -107,7 +121,7 @@ export const WidgetAutScreen = () => {
               <FormItem>
                 <FormControl>
                   <Input
-                    placeholder="Your Email"
+                    placeholder="Your email"
                     type="email"
                     className="h-10 bg-background"
                     {...field}
@@ -124,7 +138,7 @@ export const WidgetAutScreen = () => {
             size="lg"
             disabled={form.formState.isSubmitting}
           >
-            Start Chat
+            Continue to support
           </Button>
         </form>
       </Form>

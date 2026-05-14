@@ -19,5 +19,9 @@
   "packageManager": "pnpm@10.4.1",
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "@ai-sdk/groq": "^3.0.39",
+    "@ai-sdk/voyage": "^1.0.4"
   }
 }

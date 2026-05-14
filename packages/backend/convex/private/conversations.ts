@@ -1,9 +1,21 @@
-import { mutation, query } from "../_generated/server.js";
+import { mutation, query, QueryCtx, MutationCtx } from "../_generated/server.js";
 import { ConvexError, v } from "convex/values";
 import { supportAgent } from "../system/ai/agents/supportAgent.js";
 import { paginationOptsValidator, PaginationResult } from "convex/server";
 import { MessageDoc } from "@convex-dev/agent";
 import { Doc } from "../_generated/dataModel.js";
+
+async function requireCurrentUser(ctx: QueryCtx | MutationCtx) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new ConvexError({ message: "Unauthorized", code: "unauthorized" });
+  }
+
+  return await ctx.db
+    .query("users")
+    .withIndex("byEmail", (q) => q.eq("email", identity.email!.toLowerCase()))
+    .unique();
+}
 
 export const getMany = query({
   args: {
@@ -17,26 +29,34 @@ export const getMany = query({
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, { status, paginationOpts }) => {
-    const identity = ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError({
-        message: "Unauthorized",
-        code: "unauthorized",
-      });
+    const user = await requireCurrentUser(ctx);
+
+    if (!user) {
+      return {
+        page: [],
+        isDone: true,
+        continueCursor: "0",
+        splitCursor: null,
+        pageStatus: "SplitRecommended" as const,
+      };
     }
+
     let conversations: PaginationResult<Doc<"conversations">>;
 
     if (status) {
       conversations = await ctx.db
         .query("conversations")
-        .withIndex("byStatus", (q) =>
-          q.eq("status", status as Doc<"conversations">["status"])
+        .withIndex("byOrganizationIdAndStatus", (q) =>
+          q.eq("organizationId", user._id).eq("status", status)
         )
         .order("desc")
         .paginate(paginationOpts);
     } else {
       conversations = await ctx.db
         .query("conversations")
+        .withIndex("byOrganizationId", (q) =>
+          q.eq("organizationId", user._id)
+        )
         .order("desc")
         .paginate(paginationOpts);
     }
@@ -66,10 +86,9 @@ export const getMany = query({
         };
       })
     );
+
     const validatedConversations = conversationsWithDetails.filter(
-      (conv): conv is NonNullable<typeof conv> => {
-        return conv !== null;
-      }
+      (conv): conv is NonNullable<typeof conv> => conv !== null
     );
 
     return {
@@ -84,12 +103,9 @@ export const getOne = query({
     conversationId: v.id("conversations"),
   },
   handler: async (ctx, { conversationId }) => {
-    const identity = ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError({
-        message: "Unauthorized",
-        code: "unauthorized",
-      });
+    const user = await requireCurrentUser(ctx);
+    if (!user) {
+      throw new ConvexError({ message: "User not found", code: "not_found" });
     }
 
     const conversation = await ctx.db.get(conversationId);
@@ -97,6 +113,13 @@ export const getOne = query({
       throw new ConvexError({
         message: "Conversation not found",
         code: "not_found",
+      });
+    }
+
+    if (conversation.organizationId !== user._id) {
+      throw new ConvexError({
+        message: "Access to this conversation is unauthorized",
+        code: "unauthorized",
       });
     }
 
@@ -125,12 +148,9 @@ export const updateStatus = mutation({
     ),
   },
   handler: async (ctx, { conversationId, status }) => {
-    const identity = ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError({
-        message: "Unauthorized",
-        code: "unauthorized",
-      });
+    const user = await requireCurrentUser(ctx);
+    if (!user) {
+      throw new ConvexError({ message: "User not found", code: "not_found" });
     }
 
     const conversation = await ctx.db.get(conversationId);
@@ -141,25 +161,31 @@ export const updateStatus = mutation({
       });
     }
 
-    await ctx.db.patch(conversationId, {
-      status,
-    });
+    if (conversation.organizationId !== user._id) {
+      throw new ConvexError({
+        message: "Access to this conversation is unauthorized",
+        code: "unauthorized",
+      });
+    }
+
+    await ctx.db.patch(conversationId, { status });
   },
 });
 
 export const getStats = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError({
-        message: "Unauthorized",
-        code: "unauthorized",
-      });
+    const user = await requireCurrentUser(ctx);
+
+    if (!user) {
+      return { total: 0, unresolved: 0, resolved: 0, escalated: 0 };
     }
 
-    const conversations = await ctx.db.query("conversations").collect();
-    
+    const conversations = await ctx.db
+      .query("conversations")
+      .withIndex("byOrganizationId", (q) => q.eq("organizationId", user._id))
+      .collect();
+
     let total = 0;
     let unresolved = 0;
     let resolved = 0;

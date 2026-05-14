@@ -1,4 +1,4 @@
-import { google } from "@ai-sdk/google";
+import { MODELS } from "../models";
 import { createTool } from "@convex-dev/agent";
 import { generateText } from "ai";
 import z from "zod";
@@ -7,7 +7,6 @@ import { supportAgent } from "../agents/supportAgent";
 import rag from "../rag";
 import { SEARCH_INTERPRETER_PROMPT } from "../constants";
 
-const NAMESPACE = "default";
 
 export const search = createTool({
     description: "Search for information in the knowledge base to help the user",
@@ -31,7 +30,7 @@ export const search = createTool({
         }
 
         const searchResults = await rag.search(ctx, {
-            namespace: NAMESPACE,
+            namespace: conversation.organizationId || "default",
             query: query,
             limit: 10,
         });
@@ -46,7 +45,7 @@ export const search = createTool({
         Here is the context:${searchResults.text}`;
 
         const response = await generateText({
-            model: google.chat("gemini-2.5-flash"),
+            model: MODELS.interpreter,
             messages: [
                 {
                     role: "system",

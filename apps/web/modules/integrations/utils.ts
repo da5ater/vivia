@@ -8,20 +8,20 @@ import {
 
 export const createScript = (
     integrationId: IntegrationId,
-    organizationId: string
+    widgetSlug: string
 ) => {
     switch (integrationId) {
         case "html":
-            return HTML_SCRIPT.replace(/{{ORGANIZATIONID}}/g, organizationId);
+            return HTML_SCRIPT.replace(/{{WIDGET_SLUG}}/g, widgetSlug);
 
         case "react":
-            return REACT_SCRIPT.replace(/{{ORGANIZATIONID}}/g, organizationId);
+            return REACT_SCRIPT.replace(/{{WIDGET_SLUG}}/g, widgetSlug);
 
         case "nextjs":
-            return NEXTJS_SCRIPT.replace(/{{ORGANIZATIONID}}/g, organizationId);
+            return NEXTJS_SCRIPT.replace(/{{WIDGET_SLUG}}/g, widgetSlug);
 
         case "javascript":
-            return JAVASCRIPT_SCRIPT.replace(/{{ORGANIZATIONID}}/g, organizationId);
+            return JAVASCRIPT_SCRIPT.replace(/{{WIDGET_SLUG}}/g, widgetSlug);
 
         default:
             return "";

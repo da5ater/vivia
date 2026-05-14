@@ -1,16 +1,33 @@
+/**
+ * Widget Header Component
+ * 
+ * This component renders the top section of the chat widget.
+ * It uses a consistent blue gradient background to match the Vivia brand
+ * and serves as a container for titles, organization names, or navigation.
+ */
+
 import { ReactNode } from "react";
 import { cn } from "@workspace/ui/lib/utils";
 
-// --- Interface Contract ---
+/**
+ * Properties for the WidgetHeader component.
+ * @param children - The elements to be displayed inside the header (like text or icons).
+ * @param className - Optional extra CSS classes for custom styling.
+ */
 interface WidgetHeaderProps {
   children: ReactNode;
   className?: string;
 }
 
-// --- Component Definition ---
+/**
+ * The header component itself.
+ * 
+ * Simple Example:
+ * <WidgetHeader>
+ *   <h1>Support Chat</h1>
+ * </WidgetHeader>
+ */
 export const WidgetHeader = ({ children, className }: WidgetHeaderProps) => {
-  // --- Style Encapsulation ---
-  // Enforces the "Brand" gradient (primary-2 to blue) while allowing overrides via cn()
   return (
     <header
       className={cn(

@@ -9,6 +9,7 @@ import {
   contactSessionIdAtom,
   conversationIdAtom,
   widgetScreenAtom,
+  widgetSettingsAtom,
 } from "../../atoms/widget-atoms";
 import { Button } from "@workspace/ui/components/button";
 import { ArrowLeftIcon } from "lucide-react";
@@ -16,9 +17,11 @@ import { formatDistanceToNow } from "date-fns";
 import { ConversationStatusIcon } from "@workspace/ui/components/conversation-status-icon";
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
 import { InfiniteScrollTrigger } from "@workspace/ui/components/InfiniteScrollTrigger";
+import { formatViviaOrganizationName } from "../../lib/branding";
 
 export const WidgetInboxScreen = () => {
   const contactSessionId = useAtomValue(contactSessionIdAtom);
+  const widgetSettings = useAtomValue(widgetSettingsAtom);
   const setConversationId = useSetAtom(conversationIdAtom);
   const setScreen = useSetAtom(widgetScreenAtom);
 
@@ -39,8 +42,8 @@ export const WidgetInboxScreen = () => {
     <div className="flex flex-col h-full flex-1">
       <WidgetHeader>
         <div className="flex flex-col justify-between gap-y-2 px-2 py-6 font-semibold">
-          <p className="text-3xl">we are here to help you</p>
-          <p className="text-lg">lets get started</p>
+          <p className="text-3xl">{formatViviaOrganizationName(widgetSettings?.organizationName)}</p>
+          <p className="text-lg">Your conversations are saved here.</p>
         </div>
 
         <Button
@@ -67,7 +70,7 @@ export const WidgetInboxScreen = () => {
           >
             <div className="flex flex-col text-start w-full gap-4 overflow-hidden">
               <div className="flex w-full items-center justify-between gap-x-2">
-                <p className="text-xs text-muted-foreground"> Chat </p>
+                <p className="text-xs text-muted-foreground">Conversation</p>
                 <p className="text-xs text-muted-foreground">
                   {formatDistanceToNow(
                     new Date(
@@ -79,7 +82,7 @@ export const WidgetInboxScreen = () => {
               </div>
               <div className="flex w-full items-center justify-between gap-x-2">
                 <p className="truncate text-sm">
-                  {conversation.lastMessage?.text || "No messages"}
+                  {conversation.lastMessage?.text || "No messages yet"}
                 </p>
                 <ConversationStatusIcon status={conversation.status} />
               </div>

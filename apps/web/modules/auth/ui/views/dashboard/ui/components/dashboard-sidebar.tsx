@@ -9,6 +9,7 @@ import {
   LibraryBigIcon,
   Mic,
   PaletteIcon,
+  SettingsIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -33,6 +34,7 @@ const customerSupportItems = [
 ];
 
 const configurationItems = [
+  { label: "Widget Settings", href: "/widget-settings", icon: SettingsIcon },
   { label: "Widget Customization", href: "/customization", icon: PaletteIcon },
   { label: "Integrations", href: "/integrations", icon: LayoutDashboardIcon },
   { label: "Voice Assistant", href: "/plugins/vapi", icon: Mic },
@@ -42,7 +44,7 @@ const accountItems = [
   { label: "Billing", href: "/billing", icon: CreditCardIcon },
 ];
 
-// ─── NavSection ───────────────────────────────────────────────────────────────
+// ─── NavItem ──────────────────────────────────────────────────────────────────
 
 const NavItem = ({
   item,
@@ -58,7 +60,8 @@ const NavItem = ({
       href={item.href}
       className={cn(
         "relative flex items-center h-10 w-full rounded-md font-medium transition-all duration-200 outline-none group/link active:scale-[0.98]",
-        !active && "text-muted-foreground hover:text-primary hover:bg-primary/[0.04] dark:hover:bg-primary/[0.06]",
+        !active &&
+        "text-muted-foreground hover:text-primary hover:bg-primary/[0.04] dark:hover:bg-primary/[0.06]",
         isCollapsed ? "justify-center px-0" : "px-3 gap-3",
         active && [
           "text-primary bg-primary/[0.06] hover:bg-primary/[0.1]",
@@ -76,7 +79,9 @@ const NavItem = ({
         className={cn(
           "relative flex items-center justify-center shrink-0 transition-colors duration-200",
           isCollapsed ? "size-6" : "size-5",
-          active ? "text-primary" : "text-muted-foreground group-hover/link:text-primary"
+          active
+            ? "text-primary"
+            : "text-muted-foreground group-hover/link:text-primary"
         )}
       >
         <item.icon className={cn(isCollapsed ? "size-5" : "size-[18px]")} />
@@ -86,9 +91,7 @@ const NavItem = ({
       <span
         className={cn(
           "whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden text-[13.5px]",
-          isCollapsed
-            ? "opacity-0 w-0 max-w-0"
-            : "opacity-100 max-w-[180px]"
+          isCollapsed ? "opacity-0 w-0 max-w-0" : "opacity-100 max-w-[180px]"
         )}
       >
         {item.label}
@@ -109,6 +112,8 @@ const NavItem = ({
 
   return content;
 };
+
+// ─── NavSection ───────────────────────────────────────────────────────────────
 
 const NavSection = ({
   label,
@@ -175,8 +180,6 @@ export const DashboardSidebar = () => {
     return pathname.startsWith(url);
   };
 
-  // Keep exact CSS layout properties before hydration completes
-  // to avoid ugly flashes, defaulting to expanded (or assuming smooth visual transition).
   const sidebarWidthClass = isCollapsed ? "w-[72px]" : "w-[240px]";
 
   return (
@@ -210,9 +213,7 @@ export const DashboardSidebar = () => {
           <div
             className={cn(
               "flex flex-col transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden",
-              isCollapsed
-                ? "opacity-0 w-0"
-                : "opacity-100 max-w-[120px]"
+              isCollapsed ? "opacity-0 w-0" : "opacity-100 max-w-[120px]"
             )}
           >
             <p className="text-[14px] font-bold text-foreground tracking-tight leading-none group-hover:text-primary transition-colors">
@@ -225,7 +226,7 @@ export const DashboardSidebar = () => {
         </Link>
       </div>
 
-      {/* Toggle button overlapping right border (Vertical Center) */}
+      {/* Toggle button overlapping right border */}
       <button
         onClick={toggleSidebar}
         aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -268,7 +269,6 @@ export const DashboardSidebar = () => {
 
       {/* ── Footer ── */}
       <div className="flex flex-col shrink-0 border-t border-border/40 pb-3 pt-3 px-3 gap-2">
-        {/* Color Theme Picker (Assuming it handles `isOpen` or similar prop gracefully) */}
         {!isCollapsed && isMounted && (
           <div className="px-1 mt-1 mb-2">
             <ColorThemePicker isOpen={true} />
@@ -301,9 +301,7 @@ export const DashboardSidebar = () => {
                   userButtonOuterIdentifier: cn(
                     "pl-0 text-[14px] transition-all duration-200",
                     isCollapsed ? "hidden" : "block",
-                    // Light Mode: Quiet & Elegant
                     "font-medium text-muted-foreground/80",
-                    // Dark Mode: High Contrast & Bold (As requested)
                     "dark:font-bold dark:!text-foreground dark:!opacity-100"
                   ),
                   avatarBox: "size-7 ring-1 ring-border shrink-0 shadow-sm",

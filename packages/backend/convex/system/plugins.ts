@@ -1,18 +1,18 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server";
 
-const NAMESPACE = "default";
 
 export const upsert = internalMutation({
   args: {
     service: v.union(v.literal("vapi")),
     secretName: v.string(),
+    namespace: v.string(),
   },
   handler: async (ctx, args) => {
     const existingPlugin = await ctx.db
       .query("Plugins")
       .withIndex("byServiceAndNamespace", (q) =>
-        q.eq("service", args.service).eq("namespace", NAMESPACE),
+        q.eq("service", args.service).eq("namespace", args.namespace),
       )
       .unique();
 
@@ -22,7 +22,7 @@ export const upsert = internalMutation({
       });
     } else {
       await ctx.db.insert("Plugins", {
-        namespace: NAMESPACE,
+        namespace: args.namespace,
         service: args.service,
         secretName: args.secretName,
       });
@@ -35,12 +35,13 @@ export const upsert = internalMutation({
 export const getByServiceAndNamespace = internalQuery({
   args: {
     service: v.union(v.literal("vapi")),
+    namespace: v.string(),
   },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("Plugins")
       .withIndex("byServiceAndNamespace", (q) =>
-        q.eq("service", args.service).eq("namespace", NAMESPACE),
+        q.eq("service", args.service).eq("namespace", args.namespace),
       )
       .unique();
   },

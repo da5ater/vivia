@@ -3,18 +3,21 @@ import { WidgetChatScreen } from "../screens/WidgetChatScreen";
 import { WidgetAutScreen } from "@/modules/ui/screens/WidgetAutScreen";
 import { WidgetFooter } from "../components/widget-footer";
 import { WidgetHeader } from "../components/widget-header";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { widgetScreenAtom } from "../../atoms/widget-atoms";
 import { WidgetScreen } from "../../types";
 import { JSX } from "react";
+import { useEffect } from "react";
 import { WidgetErrorScreen } from "../screens/WidgetErrorScreen";
 import { WidgetLoadingScreen } from "../screens/WidgetLoadingScreen";
 import { WidgetInboxScreen } from "../screens/widgetInboxScreen";
-interface WidgetViewProps {}
-
 import { WidgetSelectionScreen } from "../screens/WidgetSelectionScreen";
 import { WidgetVoiceScreen } from "../screens/Widget-Voice-Screen";
 import { WidgetContactScreen } from "../screens/Widget-Contact-Screen";
+
+interface WidgetViewProps {
+  slug: string;
+}
 
 const PlaceHolder = ({ name }: { name: string }) => {
   return (
@@ -24,13 +27,18 @@ const PlaceHolder = ({ name }: { name: string }) => {
   );
 };
 
-export const WidgetView = ({}: WidgetViewProps) => {
+export const WidgetView = ({ slug }: WidgetViewProps) => {
   const screen = useAtomValue(widgetScreenAtom);
+  const setScreen = useSetAtom(widgetScreenAtom);
+
+  useEffect(() => {
+    setScreen("loading");
+  }, [slug, setScreen]);
 
   const screenComponent: Record<WidgetScreen, JSX.Element> = {
     auth: <WidgetAutScreen />,
     error: <WidgetErrorScreen />,
-    loading: <WidgetLoadingScreen />,
+    loading: <WidgetLoadingScreen slug={slug} />,
     selection: <WidgetSelectionScreen />,
     voice: <WidgetVoiceScreen />,
     inbox: <WidgetInboxScreen />,

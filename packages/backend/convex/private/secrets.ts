@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { action } from "../_generated/server";
-import { internal } from "../_generated/api";
+import { internal, api } from "../_generated/api";
 
 export const upsert = action({
     args: {
@@ -20,10 +20,19 @@ export const upsert = action({
             });
         }
 
+        const user = await ctx.runQuery(api.users.getMyUser);
+        if (!user) {
+            throw new ConvexError({
+                message: "User not found",
+                code: "not_found",
+            });
+        }
+
         await ctx.runAction(internal.system.secrets.upsert, {
             service: args.service,
             secretName: "apiKeys",
             secretValue: args.value,
+            namespace: user._id,
         });
     },
 });
