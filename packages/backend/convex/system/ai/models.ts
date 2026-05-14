@@ -1,5 +1,4 @@
 import { google } from "@ai-sdk/google";
-import type { LanguageModel } from "ai";
 
 type ModelPurpose = "agent" | "interpreter" | "enhancer";
 
@@ -17,6 +16,6 @@ const MODEL_IDS: Record<ModelPurpose, Parameters<typeof google>[0]> = {
   enhancer: "gemini-2.5-flash-lite",
 };
 
-export function getModel(purpose: ModelPurpose): LanguageModel {
+export function getModel(purpose: ModelPurpose): unknown {
   return google(MODEL_IDS[purpose]);
 }

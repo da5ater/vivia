@@ -5,6 +5,7 @@ import { supportAgent } from "../system/ai/agents/supportAgent";
 import { paginationOptsValidator } from "convex/server";
 import { saveMessage } from "@convex-dev/agent";
 import { generateText } from "ai";
+import type { LanguageModel } from "ai";
 import { getModel } from "../system/ai/models.js";
 import { OPERATOR_MESSAGE_ENHANCEMENT_PROMPT } from "../system/ai/constants.js";
 
@@ -89,7 +90,7 @@ export const enhanceResponse = action({
     }
     const response = await generateText({
       // Use provider directly (not Vercel AI Gateway)
-      model: getModel("enhancer"),
+      model: getModel("enhancer") as LanguageModel,
       messages: [
         {
           role: "system",
