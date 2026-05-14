@@ -1,4 +1,4 @@
-import { MODELS } from "../models";
+import { getModel } from "../models";
 import { createTool } from "@convex-dev/agent";
 import { generateText } from "ai";
 import z from "zod";
@@ -45,7 +45,7 @@ export const search = createTool({
         Here is the context:${searchResults.text}`;
 
         const response = await generateText({
-            model: MODELS.interpreter,
+            model: getModel("interpreter"),
             messages: [
                 {
                     role: "system",

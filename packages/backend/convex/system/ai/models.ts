@@ -1,15 +1,22 @@
 import { google } from "@ai-sdk/google";
+import type { LanguageModel } from "ai";
+
+type ModelPurpose = "agent" | "interpreter" | "enhancer";
 
 /**
  * Centralized model configuration to easily swap models and manage quotas.
  */
-export const MODELS = {
-    // Primary model for the support agent
-    agent: google("gemini-2.5-flash-lite"),
+const MODEL_IDS: Record<ModelPurpose, Parameters<typeof google>[0]> = {
+  // Primary model for the support agent
+  agent: "gemini-2.5-flash-lite",
 
-    // Model for interpreting search results (can be cheaper/faster)
-    interpreter: google("gemini-2.5-flash-lite"),
+  // Model for interpreting search results (can be cheaper/faster)
+  interpreter: "gemini-2.5-flash-lite",
 
-    // Model for enhancing operator messages
-    enhancer: google("gemini-2.5-flash-lite"),
+  // Model for enhancing operator messages
+  enhancer: "gemini-2.5-flash-lite",
 };
+
+export function getModel(purpose: ModelPurpose): LanguageModel {
+  return google(MODEL_IDS[purpose]);
+}
