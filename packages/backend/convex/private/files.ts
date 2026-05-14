@@ -1,11 +1,12 @@
 import { ConvexError, v } from "convex/values";
-import { action, mutation, query, QueryCtx } from "../_generated/server";
+import { action, mutation, query, QueryCtx, MutationCtx } from "../_generated/server";
 import {
   contentHashFromArrayBuffer,
   Entry,
   EntryId,
   guessMimeTypeFromContents,
   guessMimeTypeFromExtension,
+  NamespaceId,
   vEntryId,
 } from "@convex-dev/rag";
 import rag from "../system/ai/rag";
@@ -13,7 +14,7 @@ import { Id } from "../_generated/dataModel";
 import { extractTextContent } from "../lib/extractTextContent";
 import { paginationOptsValidator } from "convex/server";
 
-const NAMESPACE = "default";
+import { api } from "../_generated/api";
 
 function guessMimeType(filename: string, bytes: ArrayBuffer): string {
   return (
@@ -21,6 +22,36 @@ function guessMimeType(filename: string, bytes: ArrayBuffer): string {
     guessMimeTypeFromContents(bytes) ||
     "application/octet-stream"
   );
+}
+
+async function assertEntryBelongsToNamespace(
+  ctx: MutationCtx,
+  namespaceId: NamespaceId,
+  entryId: EntryId
+) {
+  let cursor: string | null = null;
+
+  while (true) {
+    const result = await rag.list(ctx, {
+      namespaceId,
+      paginationOpts: { numItems: 100, cursor },
+    });
+
+    if (result.page.some((entry) => entry.entryId === entryId)) {
+      return;
+    }
+
+    if (result.isDone) {
+      break;
+    }
+
+    cursor = result.continueCursor;
+  }
+
+  throw new ConvexError({
+    code: "UNAUTHORIZED",
+    message: "Access to this file is unauthorized",
+  });
 }
 
 /* =========================
@@ -39,8 +70,19 @@ export const deleteFile = mutation({
       });
     }
 
+    const user = await ctx.db
+      .query("users")
+      .withIndex("byEmail", (q) => q.eq("email", identity.email!.toLowerCase()))
+      .unique();
+    if (!user) {
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "User not found",
+      });
+    }
+
     const namespace = await rag.getNamespace(ctx, {
-      namespace: NAMESPACE,
+      namespace: user._id,
     });
     if (!namespace) {
       throw new ConvexError({
@@ -58,6 +100,8 @@ export const deleteFile = mutation({
         message: "Entry not found",
       });
     }
+
+    await assertEntryBelongsToNamespace(ctx, namespace.namespaceId, args.entryId);
 
     if (entry.metadata?.storageId) {
       await ctx.storage.delete(entry.metadata.storageId as Id<"_storage">);
@@ -114,9 +158,18 @@ export const addFile = action({
     let created = false;
 
 
+    const user = await ctx.runQuery(api.users.getMyUser);
+    if (!user) {
+      await ctx.storage.delete(storageId);
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "User not found",
+      });
+    }
+
     try {
       const result = await rag.add(ctx, {
-        namespace: NAMESPACE,
+        namespace: user._id,
         text: text.trim() || " ",
         key: filename,
         title: filename,
@@ -169,8 +222,19 @@ export const list = query({
       });
     }
 
+    const user = await ctx.db
+      .query("users")
+      .withIndex("byEmail", (q) => q.eq("email", identity.email!.toLowerCase()))
+      .unique();
+    if (!user) {
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "User not found",
+      });
+    }
+
     const namespace = await rag.getNamespace(ctx, {
-      namespace: NAMESPACE,
+      namespace: user._id,
     });
 
     if (!namespace) {
@@ -284,8 +348,19 @@ export async function listFilesInternal(
     });
   }
 
+  const user = await ctx.db
+    .query("users")
+    .withIndex("byEmail", (q) => q.eq("email", identity.email!.toLowerCase()))
+    .unique();
+  if (!user) {
+    throw new ConvexError({
+      code: "UNAUTHORIZED",
+      message: "User not found",
+    });
+  }
+
   const namespace = await rag.getNamespace(ctx, {
-    namespace: NAMESPACE,
+    namespace: user._id,
   });
 
   if (!namespace) {

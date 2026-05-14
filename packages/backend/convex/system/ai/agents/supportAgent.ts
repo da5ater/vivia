@@ -1,4 +1,4 @@
-import { google } from "@ai-sdk/google";
+import { MODELS } from "../models";
 import { Agent } from "@convex-dev/agent";
 import { components } from "../../../_generated/api";
 import { escalateConversation } from "../tools/escalateConversation";
@@ -11,7 +11,7 @@ export const supportAgent = new Agent(components.agent, {
   // Define the model and provider
   // The Google provider automatically uses the GOOGLE_GENERATIVE_AI_API_KEY from your env variables
   name: "supportAgent",
-  languageModel: google("gemini-2.5-flash"),
+  languageModel: MODELS.agent,
 
   // Initial System Prompt
   instructions: SUPPORT_AGENT_PROMPT,

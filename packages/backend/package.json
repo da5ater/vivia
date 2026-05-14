@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.22",
+    "@ai-sdk/groq": "^3.0.39",
     "@ai-sdk/openai": "^3.0.25",
     "@aws-sdk/client-secrets-manager": "^3.993.0",
     "@clerk/backend": "^3.2.3",

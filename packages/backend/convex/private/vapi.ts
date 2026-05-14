@@ -1,5 +1,5 @@
 import { VapiClient, Vapi } from "@vapi-ai/server-sdk";
-import { internal } from "../_generated/api"
+import { internal, api } from "../_generated/api"
 import { action } from "../_generated/server";
 import { getSecretValue, parseSecretString } from "../lib/secrets";
 import { ConvexError, v } from "convex/values";
@@ -15,10 +15,19 @@ export const getAssistants = action({
                 code: "NOT_FOUND",
             });
         }
+        const user = await ctx.runQuery(api.users.getMyUser);
+        if (!user) {
+            throw new ConvexError({
+                message: "User not found",
+                code: "NOT_FOUND",
+            });
+        }
+
         const plugin = await ctx.runQuery(
             internal.system.plugins.getByServiceAndNamespace,
             {
                 service: "vapi",
+                namespace: user._id,
             }
         );
         if (!plugin) {
@@ -28,7 +37,7 @@ export const getAssistants = action({
             });
         }
 
-        const secretName = `tenant/default/vapi/${plugin.secretName}`;
+        const secretName = `tenant/${user._id}/vapi/${plugin.secretName}`;
         const secretValue = await getSecretValue(ctx, secretName);
         const secretData = parseSecretString<{
             privateApiKey: string;
@@ -69,10 +78,19 @@ export const getPhoneNumbers = action({
                 code: "NOT_FOUND",
             });
         }
+        const user = await ctx.runQuery(api.users.getMyUser);
+        if (!user) {
+            throw new ConvexError({
+                message: "User not found",
+                code: "NOT_FOUND",
+            });
+        }
+
         const plugin = await ctx.runQuery(
             internal.system.plugins.getByServiceAndNamespace,
             {
                 service: "vapi",
+                namespace: user._id,
             }
         );
         if (!plugin) {
@@ -82,7 +100,7 @@ export const getPhoneNumbers = action({
             });
         }
 
-        const secretName = `tenant/default/vapi/${plugin.secretName}`;
+        const secretName = `tenant/${user._id}/vapi/${plugin.secretName}`;
         const secretValue = await getSecretValue(ctx, secretName);
         const secretData = parseSecretString<{
             privateApiKey: string;

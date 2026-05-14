@@ -79,12 +79,12 @@ const VoiceIdleState = ({
   isSpeaking: boolean;
 }) => {
   const label = isConnecting
-    ? "Connecting…"
+    ? "Connecting..."
     : isConnected
       ? isSpeaking
-        ? "Assistant is speaking…"
-        : "Listening…"
-      : "Start a call to begin";
+        ? "Vivia Assistant is speaking..."
+        : "Listening..."
+      : "Start a voice call when you are ready";
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-5 px-6">
@@ -194,7 +194,7 @@ const MessageBubble = ({
               isUser ? "text-primary-foreground/70" : "text-muted-foreground/80"
             )}
           >
-            {isUser ? "You" : "Assistant"}
+            {isUser ? "You" : "Vivia Assistant"}
           </p>
         )}
 
@@ -253,7 +253,7 @@ export const WidgetVoiceScreen = () => {
           </Button>
 
           <div className="flex flex-col leading-tight">
-            <p className="text-sm font-semibold">Voice Chat</p>
+            <p className="text-sm font-semibold">Voice Support</p>
             {isConnected && (
               <p className="text-xs tabular-nums text-muted-foreground">
                 {callTimer}
@@ -327,10 +327,10 @@ export const WidgetVoiceScreen = () => {
             />
             <span>
               {isConnecting
-                ? "Connecting…"
+                ? "Connecting..."
                 : isSpeaking
-                  ? "Assistant speaking…"
-                  : "Listening to you…"}
+                  ? "Vivia Assistant is speaking..."
+                  : "Listening to you..."}
             </span>
           </div>
         )}
@@ -356,7 +356,7 @@ export const WidgetVoiceScreen = () => {
               onClick={startCall}
             >
               <MicIcon className="size-5" />
-              <span>{isConnecting ? "Connecting…" : "Start Call"}</span>
+              <span>{isConnecting ? "Connecting..." : "Start voice call"}</span>
             </Button>
           )}
         </div>
