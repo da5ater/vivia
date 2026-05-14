@@ -1,2 +1,0 @@
-﻿convex/http.ts(2,35): error TS2307: Cannot find module '@clerk/backend' or its corresponding type declarations.
-convex/http.ts(29,48): error TS2339: Property 'subscription' does not exist on type '{ system: { contactSessions: { getOne: FunctionReference<"query", "internal", { contactSessionId: Id<"contact_sessions">; }, { _id: Id<"contact_sessions">; _creationTime: number; metadata?: { ...; } | undefined; name: string; email: string; createdAt: number; expiresAt: number; } | null, string | undefined>; }; conv...'.

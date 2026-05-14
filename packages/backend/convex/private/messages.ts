@@ -5,7 +5,7 @@ import { supportAgent } from "../system/ai/agents/supportAgent";
 import { paginationOptsValidator } from "convex/server";
 import { saveMessage } from "@convex-dev/agent";
 import { generateText } from "ai";
-import { google } from "@ai-sdk/google";
+import { MODELS } from "../system/ai/models.js";
 import { OPERATOR_MESSAGE_ENHANCEMENT_PROMPT } from "../system/ai/constants.js";
 
 export const create = mutation({
@@ -31,8 +31,9 @@ export const create = mutation({
       throw new ConvexError("Cannot add messages to a resolved conversation");
     }
     if (conversation.status === "unresolved") {
-      await ctx.db.patch(conversationId,
-        { status: "escalated" });
+      await ctx.runMutation(internal.system.conversations.escalate, {
+        threadId: conversation.threadId,
+      });
     }
 
     await saveMessage(ctx, components.agent, {
@@ -88,7 +89,7 @@ export const enhanceResponse = action({
     }
     const response = await generateText({
       // Use provider directly (not Vercel AI Gateway)
-      model: google("gemini-2.5-flash"),
+      model: MODELS.enhancer,
       messages: [
         {
           role: "system",

@@ -18,7 +18,7 @@ export const WidgetContactScreen = () => {
   const setScreen = useSetAtom(widgetScreenAtom);
   const widgetSettings = useAtomValue(widgetSettingsAtom);
 
-  const rawPhoneNumber = widgetSettings?.vapiSettings?.phoneNumber ?? "";
+  const rawPhoneNumber = widgetSettings?.phoneNumber ?? "";
   
   // If the saved phone number is a UUID (internal Vapi ID), we ignore it forcing them to re-save
   const hasValidPhone = rawPhoneNumber && !isUUID(rawPhoneNumber);
@@ -50,8 +50,8 @@ export const WidgetContactScreen = () => {
         </Button>
 
         <div className="flex flex-col leading-tight">
-          <p className="text-sm font-semibold text-primary-foreground">Call Us</p>
-          <p className="text-xs text-primary-foreground/70">Reach our team by phone</p>
+          <p className="text-sm font-semibold text-primary-foreground">Call Our Team</p>
+          <p className="text-xs text-primary-foreground/70">We are happy to help by phone</p>
         </div>
       </WidgetHeader>
 
@@ -68,10 +68,9 @@ export const WidgetContactScreen = () => {
 
         {/* Instructional copy */}
         <div className="space-y-1 text-center">
-          <p className="text-sm font-semibold">Give us a call</p>
+          <p className="text-sm font-semibold">Prefer to talk?</p>
           <p className="text-xs text-muted-foreground">
-            Our team is available to help. Tap the number below to dial or copy
-            it to your clipboard.
+            Tap the number below to call us, or copy it for later.
           </p>
         </div>
 
@@ -119,9 +118,9 @@ export const WidgetContactScreen = () => {
         ) : (
           <div className="w-full rounded-2xl border border-border bg-muted/50 p-4 text-center text-sm text-muted-foreground flex flex-col items-center gap-2">
             {!hasValidPhone && rawPhoneNumber ? (
-              <span>Your phone number needs to be re-saved in the Dashboard.</span>
+              <span>The phone number needs to be saved again in the dashboard.</span>
             ) : (
-              <span>No phone number configured.</span>
+              <span>No phone number is available right now.</span>
             )}
           </div>
         )}
@@ -131,7 +130,7 @@ export const WidgetContactScreen = () => {
           <a href={`tel:${phoneNumber}`} className="w-full">
             <Button className="w-full" size="lg">
               <PhoneCallIcon className="size-5" />
-              <span>Call Now</span>
+              <span>Call now</span>
             </Button>
           </a>
         )}

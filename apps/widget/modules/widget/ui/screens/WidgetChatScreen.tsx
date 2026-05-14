@@ -1,7 +1,7 @@
 "use client";
 
 import { AISuggestion, AISuggestions } from "@workspace/ui/components/ai/suggestion";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useAction, useQuery } from "convex/react";
 import { api } from "@workspace/backend/convex/_generated/api";
@@ -20,6 +20,7 @@ import {
 import {
   conversationIdAtom,
   contactSessionIdAtom,
+  errorMessageAtom,
   widgetScreenAtom,
   widgetSettingsAtom,
 } from "../../atoms/widget-atoms";
@@ -68,7 +69,7 @@ const EmptyConversation = () => (
     <div className="space-y-1">
       <p className="text-sm font-medium">Start the conversation</p>
       <p className="text-xs text-muted-foreground">
-        Ask anything — we're here to help.
+        Ask anything. We are here to help.
       </p>
     </div>
   </div>
@@ -77,14 +78,14 @@ const EmptyConversation = () => (
 const ResolvedBanner = () => (
   <div className="mx-3 mb-2 flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700 dark:border-green-900 dark:bg-green-950/40 dark:text-green-400">
     <CheckCircle2Icon className="size-3.5 shrink-0" />
-    <span>This conversation has been marked as resolved.</span>
+    <span>This conversation is resolved. Thanks for chatting with us.</span>
   </div>
 );
 
 const EscalatedBanner = () => (
   <div className="mx-3 mb-2 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-400">
     <HeadphonesIcon className="size-3.5 shrink-0" />
-    <span>This conversation has been escalated to a human agent.</span>
+    <span>A human support teammate will help from here.</span>
   </div>
 );
 
@@ -95,6 +96,7 @@ export const WidgetChatScreen = () => {
 
   const setScreen = useSetAtom(widgetScreenAtom);
   const setConversationId = useSetAtom(conversationIdAtom);
+  const setErrorMessage = useSetAtom(errorMessageAtom);
 
   const conversation = useQuery(
     api.public.conversations.getOne,
@@ -102,6 +104,12 @@ export const WidgetChatScreen = () => {
       ? { conversationId, contactSessionId }
       : "skip"
   );
+
+  useEffect(() => {
+    if (conversation !== null) return;
+    setConversationId(null);
+    setScreen(contactSessionId ? "selection" : "auth");
+  }, [conversation, contactSessionId, setConversationId, setScreen]);
 
   const threadId = conversation?.threadId;
   const isResolved = conversation?.status === "resolved";
@@ -134,6 +142,7 @@ export const WidgetChatScreen = () => {
   };
 
   const createdMessage = useAction(api.public.messages.create);
+  const [isSending, setIsSending] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -141,16 +150,32 @@ export const WidgetChatScreen = () => {
     mode: "onChange",
   });
 
-  const isSubmitting = form.formState.isSubmitting;
+  const isSubmitting = form.formState.isSubmitting || isSending;
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!threadId || !contactSessionId) return;
-    form.reset();
-    await createdMessage({
-      threadId,
-      contactSessionId,
-      prompt: values.message,
-    });
+  const onSubmit = async (values?: z.infer<typeof formSchema>) => {
+    const rawMessage = values?.message ?? form.getValues("message") ?? "";
+    const prompt = rawMessage.trim();
+    if (!threadId || !contactSessionId || !prompt || isSending) return;
+
+    setIsSending(true);
+    try {
+      form.reset();
+      await createdMessage({
+        threadId,
+        contactSessionId,
+        prompt,
+      });
+    } catch (error) {
+      console.error("Failed to send widget message:", error);
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to send message. Please try again."
+      );
+      setScreen("error");
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const { topElementRef, canLoadMore, isLoadingMore } = useInfiniteScroll({
@@ -187,13 +212,13 @@ export const WidgetChatScreen = () => {
 
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold uppercase tracking-wide text-primary-foreground">
-              Assistant
+              Vivia Assistant
             </p>
 
             <div className="mt-0.5 flex items-center gap-1.5">
               <span className={cn("size-2 rounded-full", isDone ? "bg-muted-foreground/40" : "bg-green-400")} />
               <p className="truncate text-xs text-primary-foreground/80">
-                {isResolved ? "Resolved" : isEscalated ? "Escalated to Support" : "Online"}
+                {isResolved ? "Resolved" : isEscalated ? "Human support" : "Online and ready"}
               </p>
             </div>
           </div>
@@ -235,7 +260,7 @@ export const WidgetChatScreen = () => {
                   >
                     {isFirst && (
                       <p className="px-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70">
-                        {isUser ? "You" : "Assistant"}
+                        {isUser ? "You" : "Vivia Assistant"}
                       </p>
                     )}
 
@@ -271,7 +296,7 @@ export const WidgetChatScreen = () => {
         <div className="border-t bg-background/50 px-3 py-2">
           <div className="mb-1.5 flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/60">
             <SparklesIcon className="size-3" />
-            <span>Suggested</span>
+            <span>Helpful starters</span>
           </div>
           <AISuggestions className="flex w-full flex-row flex-wrap gap-1.5 p-0">
             {suggestions.map((suggestion) => (
@@ -280,6 +305,7 @@ export const WidgetChatScreen = () => {
                 suggestion={suggestion}
                 className="h-auto whitespace-normal text-left text-xs"
                 onClick={() => {
+                  if (isSubmitting) return;
                   form.setValue("message", suggestion, {
                     shouldValidate: true,
                     shouldDirty: true,
@@ -303,23 +329,27 @@ export const WidgetChatScreen = () => {
         >
           <FormField
             control={form.control}
-            disabled={isDone}
+            disabled={isDone || isSubmitting}
             name="message"
             render={({ field }) => (
               <AIInputTextarea
                 {...field}
                 placeholder={
                   isResolved
-                    ? "This conversation has been resolved"
+                    ? "This conversation is resolved"
                     : isEscalated
-                      ? "Escalated to a human agent"
-                      : "Type your message…"
+                      ? "A human support teammate will reply here"
+                      : isSubmitting
+                        ? "Sending..."
+                        : "Type your message..."
                 }
-                disabled={isDone}
+                disabled={isDone || isSubmitting}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    form.handleSubmit(onSubmit)();
+                    if (!isSubmitting) {
+                      form.handleSubmit(onSubmit)();
+                    }
                   }
                 }}
               />
@@ -329,13 +359,13 @@ export const WidgetChatScreen = () => {
           <AIInputToolbar>
             {!isDone && (
               <p className="select-none text-[10px] text-muted-foreground/50">
-                ↵ to send · ⇧↵ for newline
+                Enter to send - Shift+Enter for a new line
               </p>
             )}
 
             <AIInputTools className="ml-auto">
               <AIInputSubmit
-                disabled={!form.formState.isValid || isDone}
+                disabled={!form.formState.isValid || isDone || isSubmitting}
                 status={isSubmitting ? "submitted" : "ready"}
                 type="submit"
               />

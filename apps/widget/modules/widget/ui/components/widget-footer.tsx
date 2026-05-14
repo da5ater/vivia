@@ -1,21 +1,30 @@
+/**
+ * Widget Footer Component
+ * 
+ * This component renders the bottom navigation bar of the chat widget.
+ * It allows users to switch between the "Home" (selection) screen and 
+ * the "Inbox" screen to view their messages.
+ */
+
 import { Home, Inbox } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { set } from "zod/v4";
 import { widgetScreenAtom } from "../../atoms/widget-atoms";
 import { useAtomValue, useSetAtom } from "jotai";
 
+/**
+ * The footer navigation bar.
+ * 
+ * It highlights the icon for the screen that is currently active.
+ */
 export const WidgetFooter = () => {
-  // --- State Simulation ---
-  // Hardcoded for now, will be replaced by Jotai state later
-  let screen = useAtomValue(widgetScreenAtom);
-
+  // Get the current screen name and a function to change it
+  const screen = useAtomValue(widgetScreenAtom);
   const setScreen = useSetAtom(widgetScreenAtom);
 
-  // --- Render Logic ---
   return (
     <footer className="flex items-center justify-between border-t bg-background mt-auto">
-      {/* --- Navigation Item: Home --- */}
+      {/* Home Button: Takes the user back to the main selection screen */}
       <Button
         variant="ghost"
         size="icon"
@@ -30,7 +39,7 @@ export const WidgetFooter = () => {
         <Home className="size-5" />
       </Button>
 
-      {/* --- Navigation Item: Inbox --- */}
+      {/* Inbox Button: Takes the user to their message history */}
       <Button
         variant="ghost"
         size="icon"

@@ -8,33 +8,33 @@ import { chatBubbleIcon, closeIcon } from './icons';
     let isOpen = false;
 
     // Get configuration from script tag
-    let organizationId: string | null = null;
+    let widgetSlug: string | null = null;
     let position: 'bottom-right' | 'bottom-left' = EMBED_CONFIG.DEFAULT_POSITION;
 
     // Try to get the current script
     const currentScript = document.currentScript as HTMLScriptElement;
     if (currentScript) {
-        organizationId = currentScript.getAttribute('data-organization-id');
+        widgetSlug = currentScript.getAttribute('data-widget-slug');
         position = (currentScript.getAttribute('data-position') as 'bottom-right' | 'bottom-left') || EMBED_CONFIG.DEFAULT_POSITION;
     } else {
-        // Fallback: find script tag with the required attribute
-        // This is more robust than searching by filename which can change in build
+        // Fallback: find script tag with data-widget-slug attribute
         const scripts = document.querySelectorAll('script');
         const embedScript = Array.from(scripts).find(script =>
-            script.hasAttribute('data-organization-id')
+            script.hasAttribute('data-widget-slug')
         ) as HTMLScriptElement;
 
         if (embedScript) {
-            organizationId = embedScript.getAttribute('data-organization-id');
+            widgetSlug = embedScript.getAttribute('data-widget-slug');
             position = (embedScript.getAttribute('data-position') as 'bottom-right' | 'bottom-left') || EMBED_CONFIG.DEFAULT_POSITION;
         }
     }
 
-    // Exit if no organization ID
-    if (!organizationId) {
-        console.error('Vivia Widget: data-organization-id attribute is required');
+    // Exit if no widgetSlug
+    if (!widgetSlug) {
+        console.error('Vivia Widget: data-widget-slug attribute is required');
         return;
     }
+
 
     function init() {
         if (document.readyState === 'loading') {
@@ -119,9 +119,8 @@ import { chatBubbleIcon, closeIcon } from './icons';
     }
 
     function buildWidgetUrl(): string {
-        const params = new URLSearchParams();
-        params.append('organizationId', organizationId!);
-        return `${EMBED_CONFIG.WIDGET_URL}?${params.toString()}`;
+        // Builds: https://your-widget-url.com/vivia-organizationname
+        return `${EMBED_CONFIG.WIDGET_URL}/${widgetSlug}`;
     }
 
     function handleMessage(event: MessageEvent) {
@@ -195,19 +194,16 @@ import { chatBubbleIcon, closeIcon } from './icons';
     }
 
     // Function to reinitialize with new config
-    function reinit(newConfig: { organizationId?: string; position?: 'bottom-right' | 'bottom-left' }) {
-        // Destroy existing widget
+    function reinit(newConfig: { widgetSlug?: string; position?: 'bottom-right' | 'bottom-left' }) {
         destroy();
 
-        // Update config
-        if (newConfig.organizationId) {
-            organizationId = newConfig.organizationId;
+        if (newConfig.widgetSlug) {
+            widgetSlug = newConfig.widgetSlug;
         }
         if (newConfig.position) {
             position = newConfig.position;
         }
 
-        // Reinitialize
         init();
     }
 

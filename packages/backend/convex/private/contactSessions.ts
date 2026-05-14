@@ -13,12 +13,30 @@ export const getOneByConversationId = query({
             });
         }
 
+        const user = await ctx.db
+            .query("users")
+            .withIndex("byEmail", (q) => q.eq("email", identity.email!.toLowerCase()))
+            .unique();
+        if (!user) {
+            throw new ConvexError({
+                code: "NOT_FOUND",
+                message: "User not found",
+            });
+        }
+
         const conversation = await ctx.db.get(args.conversationId);
 
         if (!conversation) {
             throw new ConvexError({
                 code: "NOT_FOUND",
                 message: "Conversation not found",
+            });
+        }
+
+        if (conversation.organizationId !== user._id) {
+            throw new ConvexError({
+                code: "UNAUTHORIZED",
+                message: "Access to this conversation is unauthorized",
             });
         }
 

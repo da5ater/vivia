@@ -1,7 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "../_generated/server";
 
-const NAMESPACE = "default";
 
 export const getOne = query({
     args: {
@@ -17,10 +16,16 @@ export const getOne = query({
             });
         }
 
+        const user = await ctx.db
+            .query("users")
+            .withIndex("byEmail", (q) => q.eq("email", identity.email!.toLowerCase()))
+            .unique();
+        if (!user) throw new ConvexError({ message: "User not found", code: "not_found" });
+
         return await ctx.db
             .query("Plugins")
             .withIndex("byServiceAndNamespace", (q) =>
-                q.eq("service", args.service).eq("namespace", NAMESPACE),
+                q.eq("service", args.service).eq("namespace", user._id),
             )
             .unique();
     },
@@ -40,10 +45,16 @@ export const remove = mutation({
             });
         }
 
+        const user = await ctx.db
+            .query("users")
+            .withIndex("byEmail", (q) => q.eq("email", identity.email!.toLowerCase()))
+            .unique();
+        if (!user) throw new ConvexError({ message: "User not found", code: "not_found" });
+
         const existingPlugin = await ctx.db
             .query("Plugins")
             .withIndex("byServiceAndNamespace", (q) =>
-                q.eq("service", args.service).eq("namespace", NAMESPACE),
+                q.eq("service", args.service).eq("namespace", user._id),
             )
             .unique();
 
