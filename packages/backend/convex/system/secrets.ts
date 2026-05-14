@@ -3,7 +3,6 @@ import { internalAction } from "../_generated/server";
 import { upsertSecret, validateAwsConnection } from "../lib/secrets";
 import { internal } from "../_generated/api";
 
-const NAMESPACE = "default";
 
 async function validateVapiKeys(privateKey: string) {
     const res = await fetch("https://api.vapi.ai/health", {
@@ -25,17 +24,19 @@ export const upsert = internalAction({
             publicApiKey: v.string(),
             privateApiKey: v.string(),
         }),
+        namespace: v.string(),
     },
     handler: async (ctx, args) => {
         await validateVapiKeys(args.secretValue.privateApiKey);
 
-        const secretKey = `tenant/${NAMESPACE}/${args.service}/${args.secretName}`;
+        const secretKey = `tenant/${args.namespace}/${args.service}/${args.secretName}`;
 
         await upsertSecret(secretKey, args.secretValue);
 
         await ctx.runMutation(internal.system.plugins.upsert, {
             service: args.service,
             secretName: args.secretName,
+            namespace: args.namespace,
         });
 
         return { status: "success" };

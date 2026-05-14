@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
 import { useUser } from "@clerk/nextjs";
@@ -25,23 +25,27 @@ import {
 } from "@workspace/ui/components/card";
 import { createScript } from "../../utils";
 import { Zap, Key, ExternalLink } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "@workspace/backend/convex/_generated/api";
 
 export const IntegrationsView = () => {
     const { user } = useUser();
+    const userSettings = useQuery(api.private.widgetSettings.getOne);
 
     const organizationId = user?.id ?? "";
     const workspaceId = organizationId || "no-id";
+    const widgetSlug = userSettings?.slug ?? "";
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedSnippet, setSelectedSnippet] = useState("");
 
     const handleIntegrationClick = (integrationId: IntegrationId) => {
-        if (!organizationId) {
-            toast.error("Organization ID not found");
+        if (!widgetSlug) {
+            toast.error("Widget slug not found. Please set up your widget name first.");
             return;
         }
 
-        const snippet = createScript(integrationId, organizationId);
+        const snippet = createScript(integrationId, widgetSlug);
         setSelectedSnippet(snippet);
         setDialogOpen(true);
     };
@@ -285,4 +289,4 @@ export const IntegrationDialog = ({
             </DialogContent>
         </Dialog>
     );
-};
+};

@@ -16,6 +16,7 @@ import { useMutation } from "convex/react";
 import { api } from "@workspace/backend/convex/_generated/api";
 import { useState } from "react";
 import { WidgetFooter } from "../components/widget-footer";
+import { formatViviaOrganizationName } from "../../lib/branding";
 
 export const WidgetSelectionScreen = () => {
   const setScreen = useSetAtom(widgetScreenAtom);
@@ -56,9 +57,23 @@ export const WidgetSelectionScreen = () => {
   return (
     <div className="flex flex-col h-full flex-1">
       <WidgetHeader>
-        <div className="flex flex-col justify-between gap-y-2 px-2 py-6 font-semibold">
-          <p className="text-3xl">we are here to help you</p>
-          <p className="text-lg">lets get started</p>
+        <div className="flex flex-col justify-between gap-y-2 px-2 py-4 font-semibold">
+          <p className="text-2xl">
+            {formatViviaOrganizationName(widgetSettings?.organizationName)}
+          </p>
+          <p className="text-base font-normal opacity-90">
+            {widgetSettings?.greetMessage || "Hi there. How can we help today?"}
+          </p>
+        </div>
+        <div className="mx-2 p-3 bg-white/10 rounded-lg backdrop-blur-sm flex items-center justify-between border border-white/20">
+          <div className="flex flex-col">
+            <span className="text-[10px] opacity-70 uppercase tracking-tight">Support status</span>
+            <span className="text-xs font-bold">We are ready to help</span>
+          </div>
+          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/20 rounded-full border border-green-500/30">
+             <div className="size-1.5 bg-green-500 rounded-full animate-pulse" />
+             <span className="text-[10px] font-bold text-green-300">ONLINE</span>
+          </div>
         </div>
       </WidgetHeader>
 
@@ -70,11 +85,11 @@ export const WidgetSelectionScreen = () => {
         >
           <div className="flex items-center gap-x-2">
             <MessageSquareTextIcon className="h-6 w-6" />
-            <span className="text-lg font-medium">Start a Chat</span>
+            <span className="text-lg font-medium">Chat with us</span>
           </div>
           <ChevronRightIcon />
         </Button>
-        {hasVapiSecrets && widgetSettings?.vapiSettings.assistantId && (
+        {hasVapiSecrets && widgetSettings?.assistantId && (
           <Button
             className="h-16 w-full justify-between"
             variant="outline"
@@ -82,12 +97,12 @@ export const WidgetSelectionScreen = () => {
           >
             <div className="flex items-center gap-x-2">
               <MicIcon className="h-6 w-6" />
-              <span className="text-lg font-medium">Start a Voice Call</span>
+              <span className="text-lg font-medium">Start a voice call</span>
             </div>
             <ChevronRightIcon />
           </Button>
         )}
-        {hasVapiSecrets && widgetSettings?.vapiSettings.phoneNumber && (
+        {hasVapiSecrets && widgetSettings?.phoneNumber && (
           <Button
             className="h-16 w-full justify-between"
             variant="outline"
@@ -95,7 +110,7 @@ export const WidgetSelectionScreen = () => {
           >
             <div className="flex items-center gap-x-2">
               <PhoneIcon className="h-6 w-6" />
-              <span className="text-lg font-medium">Call us</span>
+              <span className="text-lg font-medium">Call our team</span>
             </div>
             <ChevronRightIcon />
           </Button>

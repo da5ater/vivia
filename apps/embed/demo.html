@@ -87,14 +87,14 @@
 
         <h2>Basic Usage</h2>
         <pre><code>&lt;script src="https://your-domain.com/widget.js" 
-        data-organization-id="<span id="example-org-id">user_38kktRNEuLChFHdeElzRCBKhv8l</span>"&gt;
+        data-widget-slug="<span id="example-org-id">vivia-demo</span>"&gt;
 &lt;/script&gt;</code></pre>
 
         <div class="config-form">
             <h3>Configuration</h3>
             <div class="form-group">
-                <label for="orgId">Organization ID:</label>
-                <input type="text" id="orgId" placeholder="Enter your organization ID" value="">
+                <label for="slugInput">Widget Slug:</label>
+                <input type="text" id="slugInput" placeholder="Enter your widget slug (e.g., vivia-demo)" value="">
             </div>
             <div class="form-group">
                 <label for="position">Position:</label>
@@ -114,18 +114,18 @@
     </div>
 
     <!-- Load the widget with default config -->
-    <script type="module" src="/embed.ts" data-organization-id="user_38kktRNEuLChFHdeElzRCBKhv8l"></script>
+    <script type="module" src="/embed.ts" data-widget-slug="vivia-demo"></script>
 
     <script type="module">
         import { EMBED_CONFIG } from './config.ts';
 
         // Set display values on load
-        document.getElementById('example-org-id').textContent = EMBED_CONFIG.DEFAULT_ORGANIZATION_ID;
-        document.getElementById('orgId').value = EMBED_CONFIG.DEFAULT_ORGANIZATION_ID;
+        document.getElementById('example-org-id').textContent = EMBED_CONFIG.DEFAULT_WIDGET_SLUG;
+        document.getElementById('slugInput').value = EMBED_CONFIG.DEFAULT_WIDGET_SLUG;
 
         window.initWidget = function () {
             const config = {
-                organizationId: document.getElementById('orgId').value || EMBED_CONFIG.DEFAULT_ORGANIZATION_ID,
+                widgetSlug: document.getElementById('slugInput').value || EMBED_CONFIG.DEFAULT_WIDGET_SLUG,
                 position: document.getElementById('position').value
             };
 

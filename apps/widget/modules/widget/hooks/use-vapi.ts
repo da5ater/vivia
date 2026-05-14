@@ -219,7 +219,7 @@ export const useVapi = () => {
   }, [vapiSecrets?.publicApiKey]);
 
   const startCall = async () => {
-    const assistantId = widgetSettings?.vapiSettings?.assistantId;
+    const assistantId = widgetSettings?.assistantId;
 
     if (!vapiRef.current || !assistantId) return;
     if (isConnecting || isConnected) return;

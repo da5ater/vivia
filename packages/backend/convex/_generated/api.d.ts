@@ -28,6 +28,7 @@ import type * as public_secrets from "../public/secrets.js";
 import type * as public_widgetSettings from "../public/widgetSettings.js";
 import type * as system_ai_agents_supportAgent from "../system/ai/agents/supportAgent.js";
 import type * as system_ai_constants from "../system/ai/constants.js";
+import type * as system_ai_models from "../system/ai/models.js";
 import type * as system_ai_rag from "../system/ai/rag.js";
 import type * as system_ai_tools_escalateConversation from "../system/ai/tools/escalateConversation.js";
 import type * as system_ai_tools_resolveConversation from "../system/ai/tools/resolveConversation.js";
@@ -66,6 +67,7 @@ declare const fullApi: ApiFromModules<{
   "public/widgetSettings": typeof public_widgetSettings;
   "system/ai/agents/supportAgent": typeof system_ai_agents_supportAgent;
   "system/ai/constants": typeof system_ai_constants;
+  "system/ai/models": typeof system_ai_models;
   "system/ai/rag": typeof system_ai_rag;
   "system/ai/tools/escalateConversation": typeof system_ai_tools_escalateConversation;
   "system/ai/tools/resolveConversation": typeof system_ai_tools_resolveConversation;

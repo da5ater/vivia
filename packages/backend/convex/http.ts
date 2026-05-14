@@ -18,29 +18,105 @@ http.route({
 
         console.log("Clerk Webhook Event:", event.type, event.data);
 
-        switch (event.type) {
+        // Cast to any: the @clerk/backend WebhookEvent union doesn't include
+        // the newer "commerce.subscription.*" billing events yet.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rawEvent = event as any;
+
+        switch (rawEvent.type) {
+            // ─── User lifecycle ───────────────────────────────────────────────
+            case "user.created":
+            case "user.updated": {
+                // Nothing to do here — syncUser handles this from the client.
+                return new Response("User event received", { status: 200 });
+            }
+
+            // ─── Clerk Billing / Commerce subscription events ─────────────────
+            // Clerk fires "commerce.subscription.*" events, NOT "subscription.*"
+            case "subscription.active":
             case "subscription.created":
             case "subscription.updated":
-            case "subscription.active":
-            case "subscription.pastDue": {
-                const subscription = event.data as {
+            case "subscription.pastDue":
+            case "commerce.subscription.activated":
+            case "commerce.subscription.created":
+            case "commerce.subscription.updated":
+            case "commerce.subscription.past_due": {
+                const subscription = rawEvent.data as {
                     status?: string;
+                    // Clerk sends the Clerk user ID under "subscriber_id"
+                    subscriber_id?: string;
+                    payer?: {
+                        user_id?: string;
+                    };
                 };
+                const subscriberId = subscription.subscriber_id ?? subscription.payer?.user_id;
 
-                if (subscription.status) {
-                    await ctx.runMutation(internal.system.subscription.upsert, {
-                        status: subscription.status,
-                    });
-                    console.log(`Subscription status updated to: ${subscription.status}`);
-                    return new Response("Subscription updated", { status: 200 });
-                } else {
-                    console.warn("Received subscription event without status:", event.type);
+                if (!subscription.status) {
+                    console.warn("Received subscription event without status:", rawEvent.type);
                     return new Response("Missing subscription status", { status: 400 });
                 }
+
+                if (!subscriberId) {
+                    console.warn("Received subscription event without subscriber id:", rawEvent.type);
+                    return new Response("Missing subscriber_id", { status: 400 });
+                }
+
+                // Look up the DB user by their Clerk token identifier
+                const user = await ctx.runQuery(internal.users.getByTokenIdentifier, {
+                    tokenIdentifier: subscriberId,
+                });
+
+                if (!user) {
+                    console.warn(
+                        "Could not find DB user for subscriber id:",
+                        subscriberId,
+                        "— event:",
+                        rawEvent.type
+                    );
+                }
+
+                await ctx.runMutation(internal.system.subscription.upsert, {
+                    organizationId: user?._id,
+                    subscriberId,
+                    status: subscription.status,
+                });
+
+                console.log(
+                    `Subscription status updated for subscriber ${subscriberId} to: ${subscription.status}`
+                );
+                return new Response("Subscription updated", { status: 200 });
+            }
+
+            case "subscription.canceled":
+            case "commerce.subscription.canceled": {
+                const subscription = rawEvent.data as {
+                    subscriber_id?: string;
+                    payer?: {
+                        user_id?: string;
+                    };
+                };
+                const subscriberId = subscription.subscriber_id ?? subscription.payer?.user_id;
+
+                if (!subscriberId) {
+                    return new Response("Missing subscriber_id", { status: 400 });
+                }
+
+                const user = await ctx.runQuery(internal.users.getByTokenIdentifier, {
+                    tokenIdentifier: subscriberId,
+                });
+
+                await ctx.runMutation(internal.system.subscription.upsert, {
+                    organizationId: user?._id,
+                    subscriberId,
+                    status: "canceled",
+                });
+                console.log(`Subscription canceled for subscriber ${subscriberId}`);
+
+                return new Response("Subscription canceled", { status: 200 });
             }
 
             default:
-                console.log("Ignored Clerk event type:", event.type);
+                console.log("Ignored Clerk event type:", rawEvent.type);
                 return new Response("Event ignored", { status: 200 });
         }
     }),
