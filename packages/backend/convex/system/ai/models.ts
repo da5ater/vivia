@@ -7,10 +7,10 @@ type ModelPurpose = "agent" | "interpreter" | "enhancer";
  */
 const MODEL_IDS: Record<ModelPurpose, Parameters<typeof google>[0]> = {
   // Primary model for the support agent
-  agent: "gemini-2.5-flash-lite",
+  agent: "gemini-2.5-flash",
 
   // Model for interpreting search results (can be cheaper/faster)
-  interpreter: "gemini-2.5-flash-lite",
+  interpreter: "gemini-2.5-flash",
 
   // Model for enhancing operator messages
   enhancer: "gemini-2.5-flash-lite",

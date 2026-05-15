@@ -84,13 +84,26 @@ export const WhatsAppIntegrationView = () => {
   };
 
   const handleSave = async () => {
+    const trimmedPhoneNumberId = phoneNumberId.trim();
+    const trimmedAccessToken = accessToken.trim();
+
+    if (!trimmedPhoneNumberId) {
+      toast.error("Phone Number ID is required");
+      return;
+    }
+
+    if (!config && !trimmedAccessToken) {
+      toast.error("Access token is required");
+      return;
+    }
+
     setIsSaving(true);
 
     try {
       await saveConfig({
-        phoneNumberId,
+        phoneNumberId: trimmedPhoneNumberId,
         businessPhoneNumber,
-        accessToken,
+        accessToken: trimmedAccessToken || undefined,
         isEnabled,
       });
       setAccessToken("");
@@ -226,7 +239,7 @@ export const WhatsAppIntegrationView = () => {
 
             <Button
               className="h-11 w-full gap-2"
-              disabled={isSaving || !phoneNumberId || !accessToken}
+              disabled={isSaving || !phoneNumberId.trim() || (!config && !accessToken.trim())}
               onClick={handleSave}
             >
               <ShieldCheck className="size-4" />

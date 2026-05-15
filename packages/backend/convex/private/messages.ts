@@ -9,41 +9,7 @@ import type { LanguageModel } from "ai";
 import { getModel } from "../system/ai/models.js";
 import { OPERATOR_MESSAGE_ENHANCEMENT_PROMPT } from "../system/ai/constants.js";
 import { getSecretValue, parseSecretString } from "../lib/secrets.js";
-
-const WHATSAPP_API_VERSION = "v21.0";
-
-async function sendWhatsAppText(args: {
-  phoneNumberId: string;
-  accessToken: string;
-  to: string;
-  text: string;
-}) {
-  const response = await fetch(
-    `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${args.phoneNumberId}/messages`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${args.accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        recipient_type: "individual",
-        to: args.to,
-        type: "text",
-        text: {
-          preview_url: false,
-          body: args.text,
-        },
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`WhatsApp send failed: ${response.status} ${errorText}`);
-  }
-}
+import { sendWhatsAppText } from "../lib/whatsapp.js";
 
 export const create = action({
   args: {
@@ -128,7 +94,7 @@ export const getMany = query({
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, { threadId, paginationOpts }) => {
-    const identity = ctx.auth.getUserIdentity();
+    const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new ConvexError({
         message: "Unauthorized",
@@ -155,7 +121,7 @@ export const enhanceResponse = action({
     threadId: v.string(),
   },
   handler: async (ctx, { prompt, threadId }) => {
-    const identity = ctx.auth.getUserIdentity();
+    const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new ConvexError({
         message: "Unauthorized",

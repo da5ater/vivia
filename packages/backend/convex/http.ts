@@ -24,7 +24,7 @@ http.route({
             { verifyToken }
         );
 
-        if (!config || !config.isEnabled) {
+        if (!config) {
             return new Response("Verification failed", { status: 403 });
         }
 
@@ -36,7 +36,7 @@ http.route({
     path: "/whatsapp",
     method: "POST",
     handler: httpAction(async (ctx, request) => {
-        const payload = await request.json() as {
+        let payload: {
             entry?: Array<{
                 changes?: Array<{
                     value?: {
@@ -61,6 +61,12 @@ http.route({
             }>;
         };
 
+        try {
+            payload = await request.json();
+        } catch {
+            return new Response("Invalid JSON", { status: 400 });
+        }
+
         for (const entry of payload.entry ?? []) {
             for (const change of entry.changes ?? []) {
                 const value = change.value;
@@ -77,15 +83,19 @@ http.route({
                         (candidate) => candidate.wa_id === message.from
                     );
 
-                    await ctx.runAction(
-                        internal.system.whatsappActions.handleIncomingMessage,
-                        {
-                            phoneNumberId,
-                            from: message.from,
-                            profileName: contact?.profile?.name,
-                            text: message.text.body,
-                        }
-                    );
+                    try {
+                        await ctx.runAction(
+                            internal.system.whatsappActions.handleIncomingMessage,
+                            {
+                                phoneNumberId,
+                                from: message.from,
+                                profileName: contact?.profile?.name,
+                                text: message.text.body,
+                            }
+                        );
+                    } catch (error) {
+                        console.error("WhatsApp message handling failed:", error);
+                    }
                 }
             }
         }

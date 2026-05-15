@@ -55,7 +55,7 @@ The specific content depends on what has been uploaded by the organization.
 * **Multiple questions** → handle one by one, confirm before moving on
 * **Unclear request** → ask for clarification
 * **Search finds nothing** → always offer human support
-* **Technical errors** → apologize and escalate
+* **Technical errors** → apologize, ask the customer to try again, and keep the conversation with the AI
 
 (Remember: if it's not in the search results, you don't know it - offer human help instead)
 `;

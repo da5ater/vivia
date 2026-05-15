@@ -17,6 +17,9 @@ import { components } from "../_generated/api.js";
 import { saveMessage } from "@convex-dev/agent";
 import { search } from "../system/ai/tools/search.js";
 
+const TEMPORARY_AI_ERROR_MESSAGE =
+  "I'm having trouble answering automatically right now. Please try again in a moment.";
+
 /**
  * Creates a new message in a conversation.
  * 
@@ -111,12 +114,13 @@ export const create = action({
           } as any
         );
       } catch (error) {
-        // If the AI fails, we automatically escalate to a human support agent
         console.error("Support agent generation failed:", error);
-        await ctx.runMutation(internal.system.conversations.escalate, {
+        await saveMessage(ctx, components.agent, {
           threadId,
-          customerMessage:
-            "I'm having trouble answering automatically right now, so I've connected you with our support team. A team member will follow up here soon.",
+          message: {
+            role: "assistant",
+            content: TEMPORARY_AI_ERROR_MESSAGE,
+          },
         });
       }
     } else {

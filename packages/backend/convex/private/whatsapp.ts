@@ -2,33 +2,10 @@ import { ConvexError, v } from "convex/values";
 import { action, mutation, query } from "../_generated/server";
 import { api, internal } from "../_generated/api";
 import { upsertSecret } from "../lib/secrets";
+import { fetchWhatsAppBusinessPhoneNumber } from "../lib/whatsapp";
 
 function createVerifyToken() {
   return crypto.randomUUID().replace(/-/g, "");
-}
-
-const WHATSAPP_API_VERSION = "v21.0";
-
-async function getBusinessPhoneNumber(args: {
-  phoneNumberId: string;
-  accessToken: string;
-}) {
-  const response = await fetch(
-    `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${args.phoneNumberId}?fields=display_phone_number`,
-    {
-      headers: {
-        Authorization: `Bearer ${args.accessToken}`,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Could not fetch WhatsApp phone number: ${response.status} ${errorText}`);
-  }
-
-  const data = await response.json() as { display_phone_number?: string };
-  return data.display_phone_number?.replace(/\D/g, "");
 }
 
 export const getOne = query({
@@ -63,7 +40,7 @@ export const upsert = action({
   args: {
     phoneNumberId: v.string(),
     businessPhoneNumber: v.optional(v.string()),
-    accessToken: v.string(),
+    accessToken: v.optional(v.string()),
     isEnabled: v.boolean(),
   },
   handler: async (ctx, args): Promise<{ status: string; verifyToken: string }> => {
@@ -81,11 +58,7 @@ export const upsert = action({
       throw new ConvexError({ message: "User not found", code: "not_found" });
     }
 
-    const accessToken = args.accessToken.trim();
     const phoneNumberId = args.phoneNumberId.trim();
-    const businessPhoneNumber =
-      args.businessPhoneNumber?.replace(/\D/g, "") ||
-      await getBusinessPhoneNumber({ phoneNumberId, accessToken });
 
     if (!phoneNumberId) {
       throw new ConvexError({
@@ -94,22 +67,42 @@ export const upsert = action({
       });
     }
 
-    if (!accessToken) {
+    const existing = await ctx.runQuery(
+      internal.system.whatsapp.getByOrganizationId,
+      { organizationId: user._id }
+    ) as {
+      verifyToken: string;
+      phoneNumberId: string;
+      businessPhoneNumber?: string;
+    } | null;
+    const accessToken = args.accessToken?.trim() ?? "";
+    const phoneNumberChanged = Boolean(
+      existing && existing.phoneNumberId !== phoneNumberId
+    );
+
+    if ((!existing || phoneNumberChanged) && !accessToken) {
       throw new ConvexError({
-        message: "Access token is required",
+        message: "Access token is required for this Phone Number ID",
         code: "bad_request",
       });
     }
 
-    const existing = await ctx.runQuery(
-      internal.system.whatsapp.getByOrganizationId,
-      { organizationId: user._id }
-    ) as { verifyToken: string } | null;
     const verifyToken: string = existing?.verifyToken ?? createVerifyToken();
     const secretName = "credentials";
     const secretKey = `tenant/${user._id}/whatsapp/${secretName}`;
+    const fetchedBusinessPhoneNumber = accessToken
+      ? await fetchWhatsAppBusinessPhoneNumber({ phoneNumberId, accessToken })
+      : undefined;
+    const canReuseBusinessPhoneNumber =
+      existing?.phoneNumberId === phoneNumberId && existing.businessPhoneNumber;
+    const businessPhoneNumber =
+      args.businessPhoneNumber?.replace(/\D/g, "") ||
+      canReuseBusinessPhoneNumber ||
+      fetchedBusinessPhoneNumber;
 
-    await upsertSecret(secretKey, { accessToken });
+    if (accessToken) {
+      await upsertSecret(secretKey, { accessToken });
+    }
 
     await ctx.runMutation(internal.system.whatsapp.upsertConfig, {
       organizationId: user._id,

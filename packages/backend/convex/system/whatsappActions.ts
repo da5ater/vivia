@@ -4,12 +4,14 @@ import { components, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { internalAction } from "../_generated/server";
 import { getSecretValue, parseSecretString } from "../lib/secrets";
+import { sendWhatsAppText } from "../lib/whatsapp";
 import { supportAgent } from "./ai/agents/supportAgent";
 import { escalateConversation } from "./ai/tools/escalateConversation";
 import { resolveConversation } from "./ai/tools/resolveConversation";
 import { search } from "./ai/tools/search";
 
-const WHATSAPP_API_VERSION = "v21.0";
+const TEMPORARY_AI_ERROR_MESSAGE =
+  "I'm having trouble answering automatically right now. Please try again in a moment.";
 
 type IncomingMessageStatus = { status: "ignored" | "saved" | "sent" };
 
@@ -34,39 +36,6 @@ function getStatusReply(status: WhatsAppConversation["status"]) {
   }
 
   return "Thanks for your message. How can I help you today?";
-}
-
-async function sendWhatsAppText(args: {
-  phoneNumberId: string;
-  accessToken: string;
-  to: string;
-  text: string;
-}) {
-  const response = await fetch(
-    `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${args.phoneNumberId}/messages`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${args.accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        recipient_type: "individual",
-        to: args.to,
-        type: "text",
-        text: {
-          preview_url: false,
-          body: args.text,
-        },
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`WhatsApp send failed: ${response.status} ${errorText}`);
-  }
 }
 
 export const handleIncomingMessage = internalAction({
@@ -136,13 +105,14 @@ export const handleIncomingMessage = internalAction({
         }
       } catch (error) {
         console.error("WhatsApp support agent generation failed:", error);
-        await ctx.runMutation(internal.system.conversations.escalate, {
+        await saveMessage(ctx, components.agent, {
           threadId: conversation.threadId,
-          customerMessage:
-            "I'm having trouble answering automatically right now, so I've connected you with our support team. A team member will follow up here soon.",
+          message: {
+            role: "assistant",
+            content: TEMPORARY_AI_ERROR_MESSAGE,
+          },
         });
-        reply =
-          "I'm having trouble answering automatically right now, so I've connected you with our support team. A team member will follow up here soon.";
+        reply = TEMPORARY_AI_ERROR_MESSAGE;
       }
     } else {
       await saveMessage(ctx, components.agent, {
