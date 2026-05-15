@@ -7,6 +7,7 @@ import {
   InboxIcon,
   LayoutDashboardIcon,
   LibraryBigIcon,
+  MessageCircle,
   Mic,
   PaletteIcon,
   SettingsIcon,
@@ -37,6 +38,7 @@ const configurationItems = [
   { label: "Widget Settings", href: "/widget-settings", icon: SettingsIcon },
   { label: "Widget Customization", href: "/customization", icon: PaletteIcon },
   { label: "Integrations", href: "/integrations", icon: LayoutDashboardIcon },
+  { label: "WhatsApp", href: "/whatsapp-integration", icon: MessageCircle },
   { label: "Voice Assistant", href: "/plugins/vapi", icon: Mic },
 ];
 

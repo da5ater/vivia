@@ -20,6 +20,7 @@ import type * as private_messages from "../private/messages.js";
 import type * as private_plugins from "../private/plugins.js";
 import type * as private_secrets from "../private/secrets.js";
 import type * as private_vapi from "../private/vapi.js";
+import type * as private_whatsapp from "../private/whatsapp.js";
 import type * as private_widgetSettings from "../private/widgetSettings.js";
 import type * as public_contact_sessions from "../public/contact_sessions.js";
 import type * as public_conversations from "../public/conversations.js";
@@ -38,6 +39,8 @@ import type * as system_conversations from "../system/conversations.js";
 import type * as system_plugins from "../system/plugins.js";
 import type * as system_secrets from "../system/secrets.js";
 import type * as system_subscription from "../system/subscription.js";
+import type * as system_whatsapp from "../system/whatsapp.js";
+import type * as system_whatsappActions from "../system/whatsappActions.js";
 import type * as users from "../users.js";
 
 import type {
@@ -59,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   "private/plugins": typeof private_plugins;
   "private/secrets": typeof private_secrets;
   "private/vapi": typeof private_vapi;
+  "private/whatsapp": typeof private_whatsapp;
   "private/widgetSettings": typeof private_widgetSettings;
   "public/contact_sessions": typeof public_contact_sessions;
   "public/conversations": typeof public_conversations;
@@ -77,6 +81,8 @@ declare const fullApi: ApiFromModules<{
   "system/plugins": typeof system_plugins;
   "system/secrets": typeof system_secrets;
   "system/subscription": typeof system_subscription;
+  "system/whatsapp": typeof system_whatsapp;
+  "system/whatsappActions": typeof system_whatsappActions;
   users: typeof users;
 }>;
 

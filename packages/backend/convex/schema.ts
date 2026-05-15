@@ -88,12 +88,36 @@ const schema = defineSchema({
         cookieEnabled: v.optional(v.boolean()),
         currentUrl: v.optional(v.string()),
         timezone: v.optional(v.string()),
+        whatsappFrom: v.optional(v.string()),
+        whatsappName: v.optional(v.string()),
       })
     ),
   })
     .index("byEmail", ["email"])
     .index("byOrganizationId", ["organizationId"])
+    .index("byOrganizationIdAndEmail", ["organizationId", "email"])
     .index("byCreatedAt", ["createdAt"]),
+
+  /**
+   * WhatsApp Configs Table
+   *
+   * Stores non-secret WhatsApp Cloud API settings for each organization.
+   * The access token itself is stored in the secret manager and referenced by
+   * secretName so normal database reads never expose it.
+   */
+  whatsappConfigs: defineTable({
+    organizationId: v.id("users"),
+    phoneNumberId: v.string(),
+    businessPhoneNumber: v.optional(v.string()),
+    verifyToken: v.string(),
+    secretName: v.string(),
+    isEnabled: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("byOrganizationId", ["organizationId"])
+    .index("byPhoneNumberId", ["phoneNumberId"])
+    .index("byVerifyToken", ["verifyToken"]),
 
   /**
    * Plugins Table

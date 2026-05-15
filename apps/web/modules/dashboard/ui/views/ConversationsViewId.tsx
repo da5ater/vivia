@@ -7,7 +7,14 @@ import { Id } from "@workspace/backend/convex/_generated/dataModel";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { MoreHorizontal, Wand2 } from "lucide-react";
+import {
+  Clock3Icon,
+  MailIcon,
+  MessageCircleIcon,
+  SparklesIcon,
+  UserRoundIcon,
+  Wand2,
+} from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import {
   AIConversation,
@@ -34,9 +41,11 @@ import { useState } from "react";
 import { ConversationStatusButton } from "../components/conversation-status-button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { toast } from "sonner";
+import { cn } from "@workspace/ui/lib/utils";
+import { formatDistanceToNow } from "date-fns";
 
 const forSchema = z.object({
-  message: z.string().min(1, "Message is required"),
+  message: z.string().trim().min(1, "Message is required"),
 });
 
 type FormValues = z.infer<typeof forSchema>;
@@ -54,12 +63,13 @@ export const ConversationsViewId = ({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(forSchema),
+    mode: "onChange",
     defaultValues: {
       message: "",
     },
   });
 
-  const createMessage = useMutation(api.private.messages.create);
+  const createMessage = useAction(api.private.messages.create);
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -70,13 +80,16 @@ export const ConversationsViewId = ({
       form.reset();
     } catch (error) {
       console.error("Failed to create message:", error);
+      const message =
+        error instanceof Error ? error.message : "Failed to send message";
+      toast.error(message);
     }
   };
 
   const messages = useThreadMessages(
     api.private.messages.getMany,
     conversation?.threadId ? { threadId: conversation.threadId } : "skip",
-    { initialNumItems: 20 }
+    { initialNumItems: 20 },
   );
 
   const updateStatus = useMutation(api.private.conversations.updateStatus);
@@ -150,77 +163,177 @@ export const ConversationsViewId = ({
     return <ConversationIdViewLoading />;
   }
 
+  const contactName = conversation.contactSession?.name || "Anonymous visitor";
+  const contactEmail = conversation.contactSession?.email;
+  const messageCount = messages.results?.length ?? 0;
+  const draft = form.watch("message");
+  const isResolved = conversation.status === "resolved";
+  const isSending = form.formState.isSubmitting;
+  const canSend = !isResolved && !isSending && draft.trim().length > 0;
+  const createdAgo = formatDistanceToNow(new Date(conversation._creationTime), {
+    addSuffix: true,
+  });
+
   return (
-    <div className="flex h-full flex-col bg-muted">
-      {/* Header */}
-      <header className="flex items-center justify-between border-b bg-background p-2.5">
-        {/* Placeholder for header content */}
+    <div className="flex h-full min-h-0 flex-col bg-[linear-gradient(180deg,hsl(var(--background))_0%,hsl(var(--muted)/0.45)_100%)]">
+      <header className="shrink-0 border-b border-border/70 bg-background/95 px-4 py-3 backdrop-blur">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            <DiceBearAvatar
+              seed={conversation.contactSessionId}
+              size={42}
+              className="ring-2 ring-background shadow-sm"
+            />
+            <div className="min-w-0">
+              <div className="flex min-w-0 items-center gap-2">
+                <h1 className="truncate text-base font-semibold tracking-tight text-foreground">
+                  {contactName}
+                </h1>
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                  {messageCount} messages
+                </span>
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                {contactEmail && (
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    <MailIcon className="size-3.5 shrink-0" />
+                    <span className="truncate">{contactEmail}</span>
+                  </span>
+                )}
+                <span className="flex items-center gap-1.5">
+                  <Clock3Icon className="size-3.5" />
+                  Started {createdAgo}
+                </span>
+              </div>
+            </div>
+          </div>
 
-        <Button variant="ghost" size="sm">
-          <MoreHorizontal className="size-4" />
-        </Button>
-
-        {!!conversation && (
-          <ConversationStatusButton
-            status={conversation.status}
-            onClick={handleToggleStatus}
-            disabled={isUpdatingStatus}
-          />
-        )}
+          <div className="flex items-center gap-2 self-start lg:self-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isResolved || isEnhancing || !draft.trim()}
+              onClick={handleEnhanceResponse}
+              className="hidden border-border/70 bg-background shadow-xs sm:inline-flex"
+              type="button"
+            >
+              <SparklesIcon className="size-4" />
+              Improve draft
+            </Button>
+            {!!conversation && (
+              <ConversationStatusButton
+                status={conversation.status}
+                onClick={handleToggleStatus}
+                disabled={isUpdatingStatus}
+              />
+            )}
+          </div>
+        </div>
       </header>
 
-      <AIConversation className="max-h-[calc(100vh-100px)] flex-1">
-        <AIConversationContent>
+      <AIConversation className="min-h-0 flex-1">
+        <AIConversationContent className="mx-auto flex w-full max-w-4xl flex-col gap-1 px-4 py-6 lg:px-6">
           <InfiniteScrollTrigger
+            ref={topElementRef}
             canLoadMore={canLoadMore}
             isLoadingMore={isLoadingMore}
             onLoadMore={handleLoadMore}
           />
-          {toUIMessages(messages.results ?? [])?.map((message) => (
-            <AIMessage
-              key={message.id}
-              // ROLE REVERSAL LOGIC:
-              // If role is 'user', we view it as 'assistant' (incoming).
-              // If role is 'assistant', we view it as 'user' (outgoing/ours).
-              from={message.role === "user" ? "assistant" : "user"}
-            >
-              <AIMessageContent>
-                {/* Only show Avatar for the End-User (incoming messages) */}
-                {message.role === "user" && (
-                  <DiceBearAvatar
-                    seed={conversation?.contactSessionId || "user"}
-                    size={32}
-                  />
-                )}
-                <AIResponse>{message.text}</AIResponse>
-              </AIMessageContent>
-            </AIMessage>
-          ))}
+          {messageCount === 0 ? (
+            <div className="flex min-h-[45vh] flex-col items-center justify-center text-center">
+              <div className="mb-4 flex size-12 items-center justify-center rounded-full border border-border/70 bg-background shadow-sm">
+                <MessageCircleIcon className="size-5 text-muted-foreground" />
+              </div>
+              <h2 className="text-sm font-semibold text-foreground">
+                No messages in this conversation yet
+              </h2>
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                When the visitor writes in, the thread will stay centered here
+                for quick replies.
+              </p>
+            </div>
+          ) : (
+            toUIMessages(messages.results ?? [])?.map((message) => {
+              const isVisitor = message.role === "user";
+
+              return (
+                <AIMessage
+                  key={message.id}
+                  from={isVisitor ? "assistant" : "user"}
+                  className={cn(
+                    "items-start py-2.5",
+                    isVisitor ? "justify-start" : "justify-end",
+                  )}
+                >
+                  <AIMessageContent
+                    className={cn(
+                      "max-w-[min(760px,82%)] rounded-2xl px-4 py-3 shadow-sm",
+                      isVisitor
+                        ? "border-border/70 bg-background text-foreground"
+                        : "border-transparent bg-primary text-primary-foreground",
+                    )}
+                  >
+                    <div className="flex items-start gap-3">
+                      {isVisitor && (
+                        <DiceBearAvatar
+                          seed={conversation?.contactSessionId || "user"}
+                          size={30}
+                          className="mt-0.5 shrink-0"
+                        />
+                      )}
+                      {!isVisitor && (
+                        <div className="mt-0.5 flex size-[30px] shrink-0 items-center justify-center rounded-full bg-primary-foreground/15">
+                          <UserRoundIcon className="size-4" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div
+                          className={cn(
+                            "mb-1 text-[11px] font-semibold uppercase tracking-wide",
+                            isVisitor
+                              ? "text-muted-foreground"
+                              : "text-primary-foreground/75",
+                          )}
+                        >
+                          {isVisitor ? contactName : "Operator"}
+                        </div>
+                        <AIResponse>{message.text}</AIResponse>
+                      </div>
+                    </div>
+                  </AIMessageContent>
+                </AIMessage>
+              );
+            })
+          )}
           <AIConversationScrollButton />
         </AIConversationContent>
       </AIConversation>
 
-      <div className="p-2">
+      <div className="shrink-0 border-t border-border/70 bg-background/95 px-4 py-3 backdrop-blur">
+        {isResolved && (
+          <div className="mx-auto mb-3 max-w-4xl rounded-lg border border-green-500/20 bg-green-500/10 px-3 py-2 text-sm font-medium text-green-700 dark:text-green-300">
+            This conversation is resolved. Reopen it to send another response.
+          </div>
+        )}
         <Form {...form}>
-          <AIInput className="p-2" onSubmit={form.handleSubmit(onSubmit)}>
+          <AIInput
+            className="mx-auto max-w-4xl rounded-xl border-border/70 p-2 shadow-sm"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
             <FormField
               control={form.control}
               name="message"
               render={({ field }) => (
                 <AIInputTextarea
                   {...field}
+                  minHeight={64}
                   placeholder={
-                    conversation?.status === "resolved"
+                    isResolved
                       ? "Conversation resolved"
-                      : "Type your response as an operator..."
+                      : `Reply to ${contactName}...`
                   }
-                  disabled={
-                    conversation.status === "resolved" ||
-                    form.formState.isSubmitting ||
-                    isEnhancing
-                  }
+                  disabled={isResolved || isSending || isEnhancing}
                   onKeyDown={(e) => {
-                    // Standard Enter-to-send logic
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
                       form.handleSubmit(onSubmit)();
@@ -231,31 +344,30 @@ export const ConversationsViewId = ({
                 />
               )}
             />
-            <AIInputToolbar>
-              <AIInputTools>
-                <div className="flex gap-2">
-                  {/* Future Feature: Enhance Prompt */}
-                  <AIInputButton
-                    onClick={handleEnhanceResponse}
-                    disabled={
-                      isEnhancing ||
-                      !form.formState.isValid ||
-                      conversation.status === "resolved"
-                    }
-                  >
-                    <Wand2 className="size-4 mr-2" /> Enhance
-                  </AIInputButton>
-                </div>
+            <AIInputToolbar className="px-1 pb-1 pt-2">
+              <AIInputTools className="min-w-0">
+                <AIInputButton
+                  onClick={handleEnhanceResponse}
+                  disabled={isEnhancing || !draft.trim() || isResolved}
+                  className="gap-2"
+                >
+                  <Wand2 className="size-4" />
+                  {isEnhancing ? "Improving..." : "Enhance"}
+                </AIInputButton>
+                <span className="hidden text-xs text-muted-foreground sm:inline">
+                  Enter to send, Shift + Enter for a new line
+                </span>
               </AIInputTools>
-              <AIInputSubmit
-                disabled={
-                  conversation.status === "resolved" ||
-                  form.formState.isSubmitting ||
-                  !form.formState.isValid
-                }
-                status="ready"
-                type="submit"
-              />
+              <div className="flex items-center gap-3">
+                <span className="text-xs tabular-nums text-muted-foreground">
+                  {draft.length}
+                </span>
+                <AIInputSubmit
+                  disabled={!canSend}
+                  status={isSending ? "submitted" : "ready"}
+                  type="submit"
+                />
+              </div>
             </AIInputToolbar>
           </AIInput>
         </Form>

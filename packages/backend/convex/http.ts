@@ -7,6 +7,94 @@ import { internal } from "./_generated/api";
 const http = httpRouter();
 
 http.route({
+    path: "/whatsapp",
+    method: "GET",
+    handler: httpAction(async (ctx, request) => {
+        const url = new URL(request.url);
+        const mode = url.searchParams.get("hub.mode");
+        const verifyToken = url.searchParams.get("hub.verify_token");
+        const challenge = url.searchParams.get("hub.challenge");
+
+        if (mode !== "subscribe" || !verifyToken || !challenge) {
+            return new Response("Invalid verification request", { status: 400 });
+        }
+
+        const config = await ctx.runQuery(
+            internal.system.whatsapp.getByVerifyToken,
+            { verifyToken }
+        );
+
+        if (!config || !config.isEnabled) {
+            return new Response("Verification failed", { status: 403 });
+        }
+
+        return new Response(challenge, { status: 200 });
+    }),
+});
+
+http.route({
+    path: "/whatsapp",
+    method: "POST",
+    handler: httpAction(async (ctx, request) => {
+        const payload = await request.json() as {
+            entry?: Array<{
+                changes?: Array<{
+                    value?: {
+                        metadata?: {
+                            phone_number_id?: string;
+                        };
+                        contacts?: Array<{
+                            wa_id?: string;
+                            profile?: {
+                                name?: string;
+                            };
+                        }>;
+                        messages?: Array<{
+                            from?: string;
+                            type?: string;
+                            text?: {
+                                body?: string;
+                            };
+                        }>;
+                    };
+                }>;
+            }>;
+        };
+
+        for (const entry of payload.entry ?? []) {
+            for (const change of entry.changes ?? []) {
+                const value = change.value;
+                const phoneNumberId = value?.metadata?.phone_number_id;
+
+                if (!phoneNumberId) continue;
+
+                for (const message of value?.messages ?? []) {
+                    if (message.type !== "text" || !message.from || !message.text?.body) {
+                        continue;
+                    }
+
+                    const contact = value?.contacts?.find(
+                        (candidate) => candidate.wa_id === message.from
+                    );
+
+                    await ctx.runAction(
+                        internal.system.whatsappActions.handleIncomingMessage,
+                        {
+                            phoneNumberId,
+                            from: message.from,
+                            profileName: contact?.profile?.name,
+                            text: message.text.body,
+                        }
+                    );
+                }
+            }
+        }
+
+        return new Response("EVENT_RECEIVED", { status: 200 });
+    }),
+});
+
+http.route({
     path: "/clerk-webhook",
     method: "POST",
     handler: httpAction(async (ctx, request) => {

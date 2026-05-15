@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { Id } from "../_generated/dataModel";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { saveMessage } from "@convex-dev/agent";
 import { components } from "../_generated/api";
@@ -13,6 +14,44 @@ export const getByThreadId = internalQuery({
       .withIndex("byThreadId", (q) => q.eq("threadId", threadId))
       .unique();
     return conversation || null;
+  },
+});
+
+export const getOperatorReplyContext = internalQuery({
+  args: {
+    conversationId: v.id("conversations"),
+    userEmail: v.string(),
+  },
+  handler: async (ctx, { conversationId, userEmail }) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("byEmail", (q) => q.eq("email", userEmail))
+      .unique();
+
+    if (!user) {
+      return null;
+    }
+
+    const conversation = await ctx.db.get(conversationId);
+
+    if (!conversation || conversation.organizationId !== user._id) {
+      return null;
+    }
+
+    const contactSession = await ctx.db.get(conversation.contactSessionId);
+
+    if (!contactSession) {
+      return null;
+    }
+
+    return {
+      _id: conversation._id,
+      organizationId: conversation.organizationId as Id<"users">,
+      contactSessionId: conversation.contactSessionId,
+      threadId: conversation.threadId,
+      status: conversation.status,
+      contactSession,
+    };
   },
 });
 

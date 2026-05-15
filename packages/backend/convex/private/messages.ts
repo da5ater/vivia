@@ -1,5 +1,5 @@
 import { v, ConvexError } from "convex/values";
-import { action, mutation, query } from "../_generated/server.js";
+import { action, query } from "../_generated/server.js";
 import { components, internal } from "../_generated/api";
 import { supportAgent } from "../system/ai/agents/supportAgent";
 import { paginationOptsValidator } from "convex/server";
@@ -8,8 +8,44 @@ import { generateText } from "ai";
 import type { LanguageModel } from "ai";
 import { getModel } from "../system/ai/models.js";
 import { OPERATOR_MESSAGE_ENHANCEMENT_PROMPT } from "../system/ai/constants.js";
+import { getSecretValue, parseSecretString } from "../lib/secrets.js";
 
-export const create = mutation({
+const WHATSAPP_API_VERSION = "v21.0";
+
+async function sendWhatsAppText(args: {
+  phoneNumberId: string;
+  accessToken: string;
+  to: string;
+  text: string;
+}) {
+  const response = await fetch(
+    `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${args.phoneNumberId}/messages`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${args.accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: args.to,
+        type: "text",
+        text: {
+          preview_url: false,
+          body: args.text,
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`WhatsApp send failed: ${response.status} ${errorText}`);
+  }
+}
+
+export const create = action({
   args: {
     prompt: v.string(),
     conversationId: v.id("conversations"),
@@ -23,7 +59,14 @@ export const create = mutation({
       });
     }
 
-    const conversation = await ctx.db.get(conversationId);
+    const conversation = await ctx.runQuery(
+      internal.system.conversations.getOperatorReplyContext,
+      {
+        conversationId,
+        userEmail: identity.email!.toLowerCase(),
+      }
+    );
+
     if (!conversation) {
       throw new ConvexError("Conversation not found");
     }
@@ -31,9 +74,40 @@ export const create = mutation({
     if (conversation.status === "resolved") {
       throw new ConvexError("Cannot add messages to a resolved conversation");
     }
+
     if (conversation.status === "unresolved") {
       await ctx.runMutation(internal.system.conversations.escalate, {
         threadId: conversation.threadId,
+      });
+    }
+
+    const whatsappFrom = conversation.contactSession.metadata?.whatsappFrom;
+
+    if (whatsappFrom) {
+      const config = await ctx.runQuery(
+        internal.system.whatsapp.getByOrganizationId,
+        { organizationId: conversation.organizationId }
+      );
+
+      if (!config || !config.isEnabled) {
+        throw new ConvexError("WhatsApp integration is not enabled");
+      }
+
+      const secretValue = await getSecretValue(
+        ctx,
+        `tenant/${config.organizationId}/whatsapp/${config.secretName}`
+      );
+      const secretData = parseSecretString<{ accessToken: string }>(secretValue);
+
+      if (!secretData?.accessToken) {
+        throw new ConvexError("WhatsApp access token not found");
+      }
+
+      await sendWhatsAppText({
+        phoneNumberId: config.phoneNumberId,
+        accessToken: secretData.accessToken,
+        to: whatsappFrom,
+        text: prompt,
       });
     }
 
