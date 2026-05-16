@@ -49,6 +49,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
         button = document.createElement('button');
         button.id = 'vivia-widget-button';
         button.innerHTML = chatBubbleIcon;
+        button.setAttribute('aria-label', 'Open Vivia support');
         button.style.cssText = `
       position: fixed;
       ${position === 'bottom-right' ? 'right: 20px;' : 'left: 20px;'}
@@ -56,7 +57,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background: #09090b;
+      background: #2563eb;
       color: white;
       border: none;
       cursor: pointer;
@@ -64,7 +65,8 @@ import { chatBubbleIcon, closeIcon } from './icons';
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 12px 30px rgba(37, 99, 235, 0.28), 0 6px 18px rgba(15, 23, 42, 0.18);
+      outline: none;
       transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
     `;
 
@@ -74,6 +76,12 @@ import { chatBubbleIcon, closeIcon } from './icons';
         });
         button.addEventListener('mouseleave', () => {
             if (button) button.style.transform = 'scale(1) translateY(0)';
+        });
+        button.addEventListener('focus', () => {
+            if (button) button.style.boxShadow = '0 0 0 4px rgba(37, 99, 235, 0.18), 0 12px 30px rgba(37, 99, 235, 0.28)';
+        });
+        button.addEventListener('blur', () => {
+            if (button) button.style.boxShadow = '0 12px 30px rgba(37, 99, 235, 0.28), 0 6px 18px rgba(15, 23, 42, 0.18)';
         });
 
         document.body.appendChild(button);
@@ -92,7 +100,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
       z-index: 999998;
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
       display: none;
       opacity: 0;
       transform: translateY(20px) scale(0.95);
@@ -161,6 +169,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
             }, 10);
             // Change button icon to close
             button.innerHTML = closeIcon;
+            button.setAttribute('aria-label', 'Close Vivia support');
         }
     }
 
@@ -175,7 +184,8 @@ import { chatBubbleIcon, closeIcon } from './icons';
             }, 300);
             // Change button icon back to chat
             button.innerHTML = chatBubbleIcon;
-            button.style.background = '#09090b';
+            button.setAttribute('aria-label', 'Open Vivia support');
+            button.style.background = '#2563eb';
         }
     }
 

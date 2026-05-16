@@ -2,14 +2,7 @@
 
 import * as React from "react";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export type ColorThemeKey =
-  | "azure"
-  | "emerald"
-  | "violet"
-  | "rose"
-  | "amber";
+export type ColorThemeKey = "azure" | "emerald" | "violet" | "rose" | "amber";
 
 export interface ColorTheme {
   key: ColorThemeKey;
@@ -24,74 +17,71 @@ export interface ColorTheme {
   };
 }
 
-// ─── Themes (5 Distinct Colors) ───────────────────────────────────────────────
-
 export const COLOR_THEMES: ColorTheme[] = [
   {
     key: "azure",
     label: "Azure",
-    swatch: "#0ea5e9", // Tailwind Sky 500
+    swatch: "#2f6fed",
     vars: {
-      "--primary": "oklch(0.6488 0.1897 239.42)",
-      "--ring": "oklch(0.6488 0.1897 239.42)",
-      "--sidebar-primary": "oklch(0.6488 0.1897 239.42)",
-      "--sidebar-ring": "oklch(0.6488 0.1897 239.42)",
-      "--chart-1": "oklch(0.6488 0.1897 239.42)",
+      "--primary": "oklch(0.62 0.16 252)",
+      "--ring": "oklch(0.62 0.16 252)",
+      "--sidebar-primary": "oklch(0.62 0.16 252)",
+      "--sidebar-ring": "oklch(0.62 0.16 252)",
+      "--chart-1": "oklch(0.62 0.16 252)",
     },
   },
   {
     key: "emerald",
     label: "Emerald",
-    swatch: "#10b981", // Tailwind Emerald 500
+    swatch: "#0f9f75",
     vars: {
-      "--primary": "oklch(0.6963 0.1699 162.48)",
-      "--ring": "oklch(0.6963 0.1699 162.48)",
-      "--sidebar-primary": "oklch(0.6963 0.1699 162.48)",
-      "--sidebar-ring": "oklch(0.6963 0.1699 162.48)",
-      "--chart-1": "oklch(0.6963 0.1699 162.48)",
+      "--primary": "oklch(0.62 0.13 160)",
+      "--ring": "oklch(0.62 0.13 160)",
+      "--sidebar-primary": "oklch(0.62 0.13 160)",
+      "--sidebar-ring": "oklch(0.62 0.13 160)",
+      "--chart-1": "oklch(0.62 0.13 160)",
     },
   },
   {
     key: "violet",
     label: "Violet",
-    swatch: "#8b5cf6", // Tailwind Violet 500
+    swatch: "#7e5bef",
     vars: {
-      "--primary": "oklch(0.6324 0.2201 296.67)",
-      "--ring": "oklch(0.6324 0.2201 296.67)",
-      "--sidebar-primary": "oklch(0.6324 0.2201 296.67)",
-      "--sidebar-ring": "oklch(0.6324 0.2201 296.67)",
-      "--chart-1": "oklch(0.6324 0.2201 296.67)",
+      "--primary": "oklch(0.6 0.16 292)",
+      "--ring": "oklch(0.6 0.16 292)",
+      "--sidebar-primary": "oklch(0.6 0.16 292)",
+      "--sidebar-ring": "oklch(0.6 0.16 292)",
+      "--chart-1": "oklch(0.6 0.16 292)",
     },
   },
   {
     key: "rose",
     label: "Rose",
-    swatch: "#f43f5e", // Tailwind Rose 500
+    swatch: "#d83a5f",
     vars: {
-      "--primary": "oklch(0.645 0.246 16.439)",
-      "--ring": "oklch(0.645 0.246 16.439)",
-      "--sidebar-primary": "oklch(0.645 0.246 16.439)",
-      "--sidebar-ring": "oklch(0.645 0.246 16.439)",
-      "--chart-1": "oklch(0.645 0.246 16.439)",
+      "--primary": "oklch(0.61 0.17 18)",
+      "--ring": "oklch(0.61 0.17 18)",
+      "--sidebar-primary": "oklch(0.61 0.17 18)",
+      "--sidebar-ring": "oklch(0.61 0.17 18)",
+      "--chart-1": "oklch(0.61 0.17 18)",
     },
   },
   {
     key: "amber",
-    label: "Amber",
-    swatch: "#f59e0b", // Tailwind Amber 500
+    label: "Gold",
+    swatch: "#d99a16",
     vars: {
-      "--primary": "oklch(0.76 0.177 75.3)",
-      "--ring": "oklch(0.76 0.177 75.3)",
-      "--sidebar-primary": "oklch(0.76 0.177 75.3)",
-      "--sidebar-ring": "oklch(0.76 0.177 75.3)",
-      "--chart-1": "oklch(0.76 0.177 75.3)",
+      "--primary": "oklch(0.69 0.12 74)",
+      "--ring": "oklch(0.69 0.12 74)",
+      "--sidebar-primary": "oklch(0.69 0.12 74)",
+      "--sidebar-ring": "oklch(0.69 0.12 74)",
+      "--chart-1": "oklch(0.69 0.12 74)",
     },
   },
 ];
 
+const DEFAULT_THEME: ColorThemeKey = "azure";
 const STORAGE_KEY = "vivia-color-theme";
-
-// ─── Context ──────────────────────────────────────────────────────────────────
 
 interface ColorThemeContextValue {
   colorTheme: ColorThemeKey;
@@ -100,12 +90,13 @@ interface ColorThemeContextValue {
 }
 
 const ColorThemeContext = React.createContext<ColorThemeContextValue>({
-  colorTheme: "azure",
-  setColorTheme: () => { },
+  colorTheme: DEFAULT_THEME,
+  setColorTheme: () => {},
   themes: COLOR_THEMES,
 });
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
+const isColorThemeKey = (value: string): value is ColorThemeKey =>
+  COLOR_THEMES.some((theme) => theme.key === value);
 
 export function ColorThemeProvider({
   children,
@@ -113,33 +104,26 @@ export function ColorThemeProvider({
   children: React.ReactNode;
 }) {
   const [colorTheme, setColorThemeState] =
-    React.useState<ColorThemeKey>("azure");
+    React.useState<ColorThemeKey>(DEFAULT_THEME);
 
-  // load + validate
   React.useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
 
-    if (
-      stored &&
-      COLOR_THEMES.some((t) => t.key === stored)
-    ) {
-      setColorThemeState(stored as ColorThemeKey);
-    } else {
-      // Fallback to default azure if indigo or invalid was stored
-      setColorThemeState("azure");
-      localStorage.setItem(STORAGE_KEY, "azure");
+    if (stored && isColorThemeKey(stored)) {
+      setColorThemeState(stored);
+      return;
     }
+
+    setColorThemeState(DEFAULT_THEME);
+    localStorage.setItem(STORAGE_KEY, DEFAULT_THEME);
   }, []);
 
-  // apply theme
   React.useEffect(() => {
-    const theme = COLOR_THEMES.find((t) => t.key === colorTheme);
+    const theme = COLOR_THEMES.find((item) => item.key === colorTheme);
     if (!theme) return;
 
-    const root = document.documentElement;
-
     Object.entries(theme.vars).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
+      document.documentElement.style.setProperty(key, value);
     });
   }, [colorTheme]);
 
@@ -156,8 +140,6 @@ export function ColorThemeProvider({
     </ColorThemeContext.Provider>
   );
 }
-
-// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useColorTheme() {
   return React.useContext(ColorThemeContext);

@@ -146,7 +146,7 @@ const MessageBubble = ({
         isFirst ? "mt-3" : "mt-0.5"
       )}
     >
-      {/* Avatar — only shown for the last message in a group */}
+      {/* Avatar is only shown for the last message in a group. */}
       <div className="flex size-6 shrink-0 items-end justify-center">
         {isLast ? (
           <div
@@ -248,6 +248,7 @@ export const WidgetVoiceScreen = () => {
             size="icon"
             onClick={handleBack}
             disabled={isConnecting}
+            className="text-primary-foreground hover:bg-white/15 hover:text-primary-foreground"
           >
             <ArrowLeftIcon className="size-5" />
           </Button>
@@ -255,7 +256,7 @@ export const WidgetVoiceScreen = () => {
           <div className="flex flex-col leading-tight">
             <p className="text-sm font-semibold">Voice Support</p>
             {isConnected && (
-              <p className="text-xs tabular-nums text-muted-foreground">
+              <p className="text-xs tabular-nums text-primary-foreground/75">
                 {callTimer}
               </p>
             )}

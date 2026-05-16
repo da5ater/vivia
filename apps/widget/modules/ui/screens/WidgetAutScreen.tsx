@@ -85,9 +85,11 @@ export const WidgetAutScreen = () => {
   return (
     <div className="flex flex-col h-full">
       <WidgetHeader>
-        <div className="flex flex-col justify-between gap-y-2 px-2 py-6 font-semibold">
-          <p className="text-3xl">{formatViviaOrganizationName(widgetSettings?.organizationName)}</p>
-          <p className="text-lg">Tell us a little about you so we can help better.</p>
+        <div className="flex flex-col justify-between gap-y-2 px-1 py-3 font-semibold">
+          <p className="text-xl leading-tight">{formatViviaOrganizationName(widgetSettings?.organizationName)}</p>
+          <p className="text-sm font-normal leading-5 opacity-90">
+            Tell us a little about you so we can help better.
+          </p>
         </div>
       </WidgetHeader>
 
@@ -134,7 +136,7 @@ export const WidgetAutScreen = () => {
 
           <Button
             type="submit"
-            className="mt-auto w-50 self-center"
+            className="mt-auto w-full"
             size="lg"
             disabled={form.formState.isSubmitting}
           >

@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
 import { useUser } from "@clerk/nextjs";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
-import { Separator } from "@workspace/ui/components/separator";
 import { INTEGRATIONS, type IntegrationId } from "../../constants";
 import Image from "next/image";
 import {
@@ -27,6 +26,8 @@ import { createScript } from "../../utils";
 import { Zap, Key, ExternalLink } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@workspace/backend/convex/_generated/api";
+import { PageHeader } from "@/components/page-header";
+import { InfoPopover } from "@/components/info-popover";
 
 export const IntegrationsView = () => {
     const { user } = useUser();
@@ -72,19 +73,14 @@ export const IntegrationsView = () => {
                 snippet={selectedSnippet}
             />
 
-            <div className="w-full space-y-10 py-4">
-                <div className="mx-auto w-full max-w-5xl space-y-10">
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-primary">
-                            <Zap size={20} className="fill-current" />
-                            <span className="text-sm font-semibold uppercase tracking-wider">Integrations</span>
-                        </div>
-                        <h1 className="text-4xl font-bold tracking-tight">Connect & Integrate</h1>
-                        <p className="max-w-2xl text-lg text-muted-foreground">
-                            Enhance your customer engagement by connecting Vivia with your favorite platforms. 
-                            Embed our powerful chatbox and start automating your support workflows in minutes.
-                        </p>
-                    </div>
+            <div className="w-full space-y-8 py-2">
+                <div className="mx-auto w-full max-w-5xl space-y-8">
+                    <PageHeader
+                        eyebrow="Integrations"
+                        title="Connect Vivia"
+                        description="Generate install snippets for your site and copy workspace identifiers for custom integrations."
+                        icon={Zap}
+                    />
 
                     <Card className="border-border/60 shadow-md">
                         <CardHeader className="pb-4">
@@ -92,8 +88,13 @@ export const IntegrationsView = () => {
                                 <Key className="text-muted-foreground" size={18} />
                                 <CardTitle className="text-lg">Workspace Identifier</CardTitle>
                             </div>
-                            <CardDescription>
-                                Your unique workspace ID is required for custom API integrations and advanced configurations.
+                            <CardDescription className="flex items-center gap-1.5">
+                                Used for custom API integrations and advanced configuration.
+                                <InfoPopover title="Workspace ID">
+                                    This ID identifies the current Vivia workspace
+                                    when another system needs to connect to your
+                                    data or widget configuration.
+                                </InfoPopover>
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -121,9 +122,9 @@ export const IntegrationsView = () => {
 
                     <div className="space-y-6">
                         <div className="space-y-1">
-                            <h2 className="text-2xl font-semibold tracking-tight">Available Integrations</h2>
+                            <h2 className="text-xl font-semibold tracking-tight">Available integrations</h2>
                             <p className="text-muted-foreground">
-                                Select a platform below to generate your integration script and get started.
+                                Select a platform to generate the correct installation script.
                             </p>
                         </div>
 
@@ -149,7 +150,7 @@ export const IntegrationsView = () => {
                                             {integration.title}
                                         </span>
                                         <span className="mt-1 flex items-center justify-center gap-1 text-[10px] uppercase font-bold text-muted-foreground group-hover:text-primary">
-                                            Setup Now <ExternalLink size={10} />
+                                            Setup now <ExternalLink size={10} />
                                         </span>
                                     </div>
                                     
@@ -194,15 +195,15 @@ export const IntegrationDialog = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-xl overflow-hidden border-none p-0 bg-transparent shadow-2xl">
-                <div className="bg-background rounded-[28px] border border-border/50 shadow-2xl overflow-hidden">
-                    <div className="p-8 space-y-8">
+            <DialogContent className="overflow-hidden border-none bg-transparent p-0 shadow-xl sm:max-w-xl">
+                <div className="overflow-hidden rounded-xl border border-border/60 bg-background shadow-xl">
+                    <div className="space-y-8 p-6">
                         <header className="space-y-2">
                             <div className="flex items-center gap-2 text-primary">
                                 <Zap size={18} className="fill-current" />
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Deployment</span>
                             </div>
-                            <DialogTitle className="text-3xl font-bold tracking-tight text-foreground">
+                            <DialogTitle className="text-2xl font-semibold tracking-tight text-foreground">
                                 Add Vivia to your site
                             </DialogTitle>
                             <DialogDescription className="text-muted-foreground text-sm font-medium">

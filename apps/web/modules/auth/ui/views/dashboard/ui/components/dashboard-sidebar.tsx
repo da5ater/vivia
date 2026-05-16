@@ -10,6 +10,7 @@ import {
   MessageCircle,
   Mic,
   PaletteIcon,
+  PlugIcon,
   SettingsIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -30,6 +31,7 @@ import { cn } from "@workspace/ui/lib/utils";
 // ─── Nav data ────────────────────────────────────────────────────────────────
 
 const customerSupportItems = [
+  { label: "Overview", href: "/", icon: LayoutDashboardIcon },
   { label: "Conversations", href: "/conversations", icon: InboxIcon },
   { label: "Knowledge Base", href: "/files", icon: LibraryBigIcon },
 ];
@@ -37,7 +39,7 @@ const customerSupportItems = [
 const configurationItems = [
   { label: "Widget Settings", href: "/widget-settings", icon: SettingsIcon },
   { label: "Widget Customization", href: "/customization", icon: PaletteIcon },
-  { label: "Integrations", href: "/integrations", icon: LayoutDashboardIcon },
+  { label: "Integrations", href: "/integrations", icon: PlugIcon },
   { label: "WhatsApp", href: "/whatsapp-integration", icon: MessageCircle },
   { label: "Voice Assistant", href: "/plugins/vapi", icon: Mic },
 ];
@@ -89,7 +91,7 @@ const NavItem = ({
         <item.icon className={cn(isCollapsed ? "size-5" : "size-[18px]")} />
       </span>
 
-      {/* Label — smooth expand/collapse */}
+      {/* Label smoothly expands and collapses. */}
       <span
         className={cn(
           "whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden text-[13.5px]",
@@ -129,7 +131,7 @@ const NavSection = ({
   isCollapsed: boolean;
 }) => (
   <div className="flex flex-col mb-4">
-    {/* Section label — animated expand/collapse */}
+    {/* Section label animates with sidebar state. */}
     <div
       className={cn(
         "overflow-hidden transition-all duration-300 ease-in-out",

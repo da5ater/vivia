@@ -23,14 +23,14 @@ export const WidgetFooter = () => {
   const setScreen = useSetAtom(widgetScreenAtom);
 
   return (
-    <footer className="flex items-center justify-between border-t bg-background mt-auto">
-      {/* Home Button: Takes the user back to the main selection screen */}
+    <footer className="mt-auto flex items-center justify-between border-t bg-background">
       <Button
         variant="ghost"
         size="icon"
+        aria-label="Open support home"
         className={cn(
-          "h-14 flex-1 rounded-none",
-          screen === "selection" && "text-primary"
+          "h-14 flex-1 rounded-none text-muted-foreground",
+          screen === "selection" && "bg-muted/50 text-primary"
         )}
         onClick={() => {
           setScreen("selection");
@@ -39,13 +39,13 @@ export const WidgetFooter = () => {
         <Home className="size-5" />
       </Button>
 
-      {/* Inbox Button: Takes the user to their message history */}
       <Button
         variant="ghost"
         size="icon"
+        aria-label="Open conversation inbox"
         className={cn(
-          "h-14 flex-1 rounded-none",
-          screen === "inbox" && "text-primary"
+          "h-14 flex-1 rounded-none text-muted-foreground",
+          screen === "inbox" && "bg-muted/50 text-primary"
         )}
         onClick={() => {
           setScreen("inbox");
