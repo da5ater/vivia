@@ -146,9 +146,11 @@ const schema = defineSchema({
     status: v.union(
       v.literal("unresolved"), // Still being discussed
       v.literal("resolved"),   // Finished
-      v.literal("escalated")    // Passed to a human support agent
+      v.literal("escalated")   // Passed to a human support agent
     ),
     createdAt: v.number(),
+    summary: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
   })
     .index("byOrganizationId", ["organizationId"])
     .index("byOrganizationIdAndStatus", ["organizationId", "status"])

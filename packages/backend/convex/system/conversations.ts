@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { saveMessage } from "@convex-dev/agent";
-import { components } from "../_generated/api";
+import { components, internal } from "../_generated/api";
 
 export const getByThreadId = internalQuery({
   args: {
@@ -110,5 +110,34 @@ export const escalate = internalMutation({
         },
       });
     }
+  },
+});
+
+export const saveSummary = internalMutation({
+  args: {
+    threadId: v.string(),
+    summary: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, { threadId, summary, tags }) => {
+    const conversation = await ctx.db
+      .query("conversations")
+      .withIndex("byThreadId", (q) => q.eq("threadId", threadId))
+      .unique();
+
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    await ctx.db.patch(conversation._id, {
+      summary,
+      tags,
+    });
+
+    await ctx.scheduler.runAfter(
+      0,
+      internal.summarize.summarizeConversation,
+      { threadId }
+    );
   },
 });

@@ -43,6 +43,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import { toast } from "sonner";
 import { cn } from "@workspace/ui/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { Badge } from "@workspace/ui/components/badge";
 
 const forSchema = z.object({
   message: z.string().trim().min(1, "Message is required"),
@@ -230,6 +231,26 @@ export const ConversationsViewId = ({
           </div>
         </div>
       </header>
+
+      {(conversation?.summary || conversation?.tags?.length) && (
+        <div className="shrink-0 border-b border-border/70 bg-background/95 px-4 py-4 backdrop-blur">
+          {conversation.summary && (
+            <p className="max-w-4xl text-sm leading-6 text-foreground">
+              {conversation.summary}
+            </p>
+          )}
+
+          {conversation.tags?.length ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {conversation.tags.map((tag) => (
+                <Badge key={tag} variant="secondary">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      )}
 
       <AIConversation className="min-h-0 flex-1">
         <AIConversationContent className="mx-auto flex w-full max-w-4xl flex-col gap-1 px-4 py-6 lg:px-6">
