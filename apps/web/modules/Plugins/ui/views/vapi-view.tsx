@@ -22,6 +22,8 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { VapiConnectedView } from "../components/vapi-connected-view";
+import { PageHeader } from "@/components/page-header";
+import { InfoPopover } from "@/components/info-popover";
 
 
 
@@ -51,8 +53,8 @@ const vapiFeatures: Feature[] = [
 ];
 
 const formSchema = z.object({
-    publicApiKey: z.string().min(1, { message: "Public API Key is Required" }),
-    privateApiKey: z.string().min(1, { message: "Private API Key is Required" }),
+    publicApiKey: z.string().min(1, { message: "Public API key is required" }),
+    privateApiKey: z.string().min(1, { message: "Private API key is required" }),
 });
 
 const VapiPluginForm = ({
@@ -106,10 +108,16 @@ const VapiPluginForm = ({
                             name="publicApiKey"
                             render={({ field }) => (
                                 <FormItem>
-                                    <Label>Public API Key</Label>
+                                    <Label className="flex items-center gap-1.5">
+                                        Public API key
+                                        <InfoPopover title="Public API key">
+                                            Used by the browser widget to start
+                                            voice sessions with Vapi.
+                                        </InfoPopover>
+                                    </Label>
                                     <FormControl>
                                         <Input {...field}
-                                            placeholder="Your Public API Key"
+                                            placeholder="Your public API key"
                                             type="password"
                                         />
                                     </FormControl>
@@ -125,10 +133,16 @@ const VapiPluginForm = ({
                             name="privateApiKey"
                             render={({ field }) => (
                                 <FormItem>
-                                    <Label>Private API Key</Label>
+                                    <Label className="flex items-center gap-1.5">
+                                        Private API key
+                                        <InfoPopover title="Private API key">
+                                            Stored securely and used server-side
+                                            to manage Vapi resources.
+                                        </InfoPopover>
+                                    </Label>
                                     <FormControl>
                                         <Input {...field}
-                                            placeholder="Your Private API Key"
+                                            placeholder="Your private API key"
                                             type="password"
                                         />
                                     </FormControl>
@@ -232,21 +246,15 @@ export const VapiView = () => {
         <>
             <VapiPluginForm open={connectOpen} setOpen={setConnectOpen} />
             <VapiPluginRemoveForm open={removeOpen} setOpen={setRemoveOpen} />
-            <div className="w-full space-y-10 py-4">
-                <div className="mx-auto w-full max-w-5xl space-y-10">
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-primary">
-                            <WorkflowIcon size={20} className="fill-current" />
-                            <span className="text-sm font-semibold uppercase tracking-wider">
-                                Voice Integration
-                            </span>
-                        </div>
-                        <h1 className="text-4xl font-bold tracking-tight">Vapi Configuration</h1>
-                        <p className="max-w-2xl text-lg text-muted-foreground">
-                            Connect your Vapi account to enable AI-powered voice calls, automated customer support, and seamless phone integration.
-                        </p>
-                    </div>
-                    <div className="mt-8">
+            <div className="w-full space-y-8 py-2">
+                <div className="mx-auto w-full max-w-5xl space-y-8">
+                    <PageHeader
+                        eyebrow="Voice Integration"
+                        title="Vapi configuration"
+                        description="Connect Vapi to enable voice calls, phone numbers, and assistant configuration for the widget."
+                        icon={WorkflowIcon}
+                    />
+                    <div>
                         {vapiPlugin ? (
                             <VapiConnectedView onDisconnect={toggleConnection} />
                         ) : (

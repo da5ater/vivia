@@ -41,6 +41,8 @@ import { useState } from "react";
 import { UploadDialog } from "../components/upload-dialog";
 import { DeleteFileDialog } from "../components/delete-file-dialog";
 import { PublicFile } from "@workspace/backend/convex/private/files";
+import { PageHeader } from "@/components/page-header";
+import { InfoPopover } from "@/components/info-popover";
 
 export const FilesView = () => {
   const files = usePaginatedQuery(
@@ -87,24 +89,14 @@ export const FilesView = () => {
         open={uploadDialogOpen}
       />
 
-      <div className="w-full space-y-10 py-4">
-        <div className="mx-auto w-full max-w-5xl space-y-10">
-          {/* Header */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-primary">
-              <DatabaseIcon size={20} className="fill-current" />
-              <span className="text-sm font-semibold uppercase tracking-wider">
-                Knowledge Base
-              </span>
-            </div>
-            <h1 className="text-4xl font-bold tracking-tight">
-              Your Documents
-            </h1>
-            <p className="max-w-2xl text-lg text-muted-foreground">
-              Upload documents to train your AI assistant—each file is processed for instant answers.
-
-            </p>
-          </div>
+      <div className="w-full space-y-8 py-2">
+        <div className="mx-auto w-full max-w-5xl space-y-8">
+          <PageHeader
+            eyebrow="Knowledge Base"
+            title="Documents"
+            description="Upload trusted content so Vivia can answer visitor questions from your business knowledge."
+            icon={DatabaseIcon}
+          />
 
           {/* Documents Card */}
           <Card className="border-border/60 shadow-md">
@@ -115,8 +107,13 @@ export const FilesView = () => {
                     <FileTextIcon className="text-muted-foreground" size={18} />
                     <CardTitle className="text-lg">All Documents</CardTitle>
                   </div>
-                  <CardDescription>
+                  <CardDescription className="flex items-center gap-1.5">
                     Supported formats: PDF, TXT, CSV, and DOC.
+                    <InfoPopover title="File training">
+                      Uploaded files are processed into the knowledge base used
+                      by the assistant. Keep files current and remove anything
+                      visitors should no longer receive answers from.
+                    </InfoPopover>
                   </CardDescription>
                 </div>
                 <Button
@@ -153,7 +150,7 @@ export const FilesView = () => {
                       <TableCell colSpan={4} className="h-32 text-center">
                         <div className="flex flex-col items-center justify-center gap-3">
                           <Loader2Icon className="h-5 w-5 animate-spin text-muted-foreground" />
-                          <p className="text-sm text-muted-foreground">Fetching your documents…</p>
+                          <p className="text-sm text-muted-foreground">Fetching your documents...</p>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -169,7 +166,7 @@ export const FilesView = () => {
                           <div className="space-y-1">
                             <p className="text-sm font-semibold">No documents uploaded</p>
                             <p className="text-sm text-muted-foreground">
-                              Start by uploading a file — your AI assistant will learn from it instantly.
+                              Start by uploading a file. Your AI assistant will learn from it instantly.
                             </p>
                           </div>
                           <Button

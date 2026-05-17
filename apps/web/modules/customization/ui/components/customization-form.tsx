@@ -43,6 +43,7 @@ import { api } from "@workspace/backend/convex/_generated/api";
 import { VapiFormFields } from "./vapi-form-fields";
 import { widgetSettingsSchema } from "../../schemas";
 import type { FormSchema } from "../../types";
+import { InfoPopover } from "@/components/info-popover";
 
 type WidgetSettings = Doc<"widgetSettings">;
 
@@ -110,7 +111,7 @@ export const CustomizationForm = ({
                 vapiSettings,
             });
 
-            toast.success("Saved!", {
+            toast.success("Saved", {
                 description: "Widget customization updated.",
             });
 
@@ -131,7 +132,7 @@ export const CustomizationForm = ({
                     <CardHeader className="space-y-1">
                         <CardTitle className="flex items-center gap-2">
                             <MessageSquareTextIcon className="h-5 w-5 text-muted-foreground" />
-                            Chat Basics
+                            Chat basics
                         </CardTitle>
                         <CardDescription>
                             What users see when they open your widget.
@@ -146,7 +147,13 @@ export const CustomizationForm = ({
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex items-center justify-between">
-                                        <FormLabel>Greeting message</FormLabel>
+                                        <FormLabel className="flex items-center gap-1.5">
+                                            Greeting message
+                                            <InfoPopover title="Greeting message">
+                                                This is the first message visitors see when
+                                                they open the widget.
+                                            </InfoPopover>
+                                        </FormLabel>
                                         <span
                                             className={`text-xs tabular-nums ${greetValue.length > MAX_GREET
                                                 ? "text-destructive"
@@ -164,7 +171,7 @@ export const CustomizationForm = ({
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        Shown when the widget first opens.
+                                        Keep it friendly, short, and specific to your business.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -181,7 +188,7 @@ export const CustomizationForm = ({
                                     <p className="text-sm font-medium">Quick suggestions</p>
                                 </div>
                                 <p className="text-sm text-muted-foreground">
-                                    Up to 3 shortcut buttons for common questions.
+                                    Up to 3 shortcut buttons for common visitor questions.
                                 </p>
                             </div>
 
@@ -207,6 +214,10 @@ export const CustomizationForm = ({
                                                         {label.slice(-1)}
                                                     </Badge>
                                                     {label}
+                                                    <InfoPopover title={label}>
+                                                        This appears as a quick action in the
+                                                        widget. Short phrases work best.
+                                                    </InfoPopover>
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input placeholder={placeholder} {...field} />
@@ -261,7 +272,7 @@ export const CustomizationForm = ({
                                         {isDirty ? "You have unsaved changes" : "All changes saved"}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                        Keep suggestions short — 2 to 4 words works best.
+                                        Keep suggestions short - 2 to 4 words works best.
                                     </p>
                                 </div>
                             </div>
@@ -274,7 +285,7 @@ export const CustomizationForm = ({
                                 {isSubmitting ? (
                                     <>
                                         <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                                        Saving…
+                                        Saving...
                                     </>
                                 ) : (
                                     <>

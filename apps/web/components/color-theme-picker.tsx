@@ -3,9 +3,17 @@
 import * as React from "react";
 import { CheckIcon, PaletteIcon } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
-import { useColorTheme, COLOR_THEMES, type ColorThemeKey } from "@/components/color-theme-provider";
-
-// ─── Swatch button ───────────────────────────────────────────────────────────
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
+import {
+  COLOR_THEMES,
+  type ColorThemeKey,
+  useColorTheme,
+} from "@/components/color-theme-provider";
 
 const Swatch = ({
   theme,
@@ -18,76 +26,77 @@ const Swatch = ({
   onClick: () => void;
   size?: "default" | "sm";
 }) => (
-  <button
-    onClick={onClick}
-    title={theme.label}
-    aria-label={`Switch to ${theme.label} theme`}
-    className={cn(
-      "relative rounded-full transition-all duration-200 outline-none",
-      "hover:scale-110 focus-visible:scale-110",
-      size === "default" ? "size-5" : "size-4",
-      isActive && "ring-2 ring-offset-2 ring-offset-sidebar scale-110"
-    )}
-    style={{
-      backgroundColor: theme.swatch,
-      "--tw-ring-color": theme.swatch,
-    } as React.CSSProperties}
-  >
-    {isActive && (
-      <CheckIcon
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={`Use ${theme.label} accent`}
         className={cn(
-          "absolute inset-0 m-auto text-white drop-shadow-sm",
-          size === "default" ? "size-2.5" : "size-2"
+          "relative rounded-full border border-black/10 outline-none transition-all duration-200 dark:border-white/15",
+          "hover:scale-110 focus-visible:scale-110 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
+          size === "default" ? "size-5" : "size-4",
+          isActive && "scale-110 shadow-sm"
         )}
-        strokeWidth={3}
-      />
-    )}
-  </button>
+        style={{
+          backgroundColor: theme.swatch,
+          "--tw-ring-color": theme.swatch,
+        } as React.CSSProperties}
+      >
+        {isActive && (
+          <CheckIcon
+            className={cn(
+              "absolute inset-0 m-auto text-white drop-shadow-sm",
+              size === "default" ? "size-2.5" : "size-2"
+            )}
+            strokeWidth={3}
+          />
+        )}
+      </button>
+    </TooltipTrigger>
+    <TooltipContent side="top" sideOffset={8}>
+      {theme.label}
+    </TooltipContent>
+  </Tooltip>
 );
-
-// ─── Main ColorThemePicker ────────────────────────────────────────────────────
 
 export function ColorThemePicker({ isOpen }: { isOpen: boolean }) {
   const { colorTheme, setColorTheme } = useColorTheme();
-  const activeTheme = COLOR_THEMES.find((t) => t.key === colorTheme) ?? COLOR_THEMES[0]!;
+  const activeTheme =
+    COLOR_THEMES.find((theme) => theme.key === colorTheme) ?? COLOR_THEMES[0]!;
 
   return (
-    <div className="transition-all duration-300">
-      {/* ── Expanded view: label + row of swatches ── */}
+    <TooltipProvider delayDuration={150}>
       {isOpen ? (
         <div className="flex items-center gap-2 px-1 py-1">
-          {/* Label */}
-          <div className="flex items-center gap-1.5 shrink-0 mr-0.5">
-            <PaletteIcon className="size-3.5 text-muted-foreground/50" />
-          </div>
-          {/* All swatches in a row */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {COLOR_THEMES.map((t) => (
+          <PaletteIcon className="size-3.5 shrink-0 text-muted-foreground/60" />
+          <div className="flex flex-wrap items-center gap-1.5">
+            {COLOR_THEMES.map((theme) => (
               <Swatch
-                key={t.key}
-                theme={t}
-                isActive={colorTheme === t.key}
-                onClick={() => setColorTheme(t.key as ColorThemeKey)}
+                key={theme.key}
+                theme={theme}
+                isActive={colorTheme === theme.key}
+                onClick={() => setColorTheme(theme.key as ColorThemeKey)}
               />
             ))}
           </div>
         </div>
       ) : (
-        /* ── Collapsed view: just the active swatch centered ── */
         <div className="flex justify-center py-1">
           <Swatch
             theme={activeTheme}
-            isActive={true}
+            isActive
             onClick={() => {
-              // Cycle to next theme
-              const idx = COLOR_THEMES.findIndex((t) => t.key === colorTheme);
-              const next = COLOR_THEMES[(idx + 1) % COLOR_THEMES.length];
-              if (next) setColorTheme(next.key as ColorThemeKey);
+              const index = COLOR_THEMES.findIndex(
+                (theme) => theme.key === colorTheme
+              );
+              const nextTheme = COLOR_THEMES[(index + 1) % COLOR_THEMES.length];
+              if (nextTheme) setColorTheme(nextTheme.key as ColorThemeKey);
             }}
             size="sm"
           />
         </div>
       )}
-    </div>
+    </TooltipProvider>
   );
 }

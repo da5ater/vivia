@@ -17,6 +17,7 @@ import { Separator } from "@workspace/ui/components/separator";
 
 import { useVapiAssistants, useVapiPhoneNumbers } from "@/modules/Plugins/hooks/use-vapi-data";
 import { Loader2Icon, BotIcon, PhoneIcon } from "lucide-react";
+import { InfoPopover } from "@/components/info-popover";
 
 interface VapiFormFieldsProps {
     form: UseFormReturn<FormSchema>;
@@ -42,6 +43,10 @@ export const VapiFormFields = ({ form }: VapiFormFieldsProps) => {
                         <FormLabel className="flex items-center gap-2">
                             <BotIcon className="h-4 w-4 text-muted-foreground" />
                             Assistant
+                            <InfoPopover title="Assistant">
+                                The selected Vapi assistant answers voice calls
+                                from this widget.
+                            </InfoPopover>
                         </FormLabel>
 
                         <FormControl>
@@ -53,7 +58,7 @@ export const VapiFormFields = ({ form }: VapiFormFieldsProps) => {
                                 <SelectTrigger className="w-full">
                                     <SelectValue
                                         placeholder={
-                                            assistantsLoading ? "Loading assistants…" : "Choose an assistant"
+                                            assistantsLoading ? "Loading assistants..." : "Choose an assistant"
                                         }
                                     />
                                 </SelectTrigger>
@@ -66,7 +71,7 @@ export const VapiFormFields = ({ form }: VapiFormFieldsProps) => {
                                         const model = assistant.model?.model?.trim() || "Unknown model";
                                         return (
                                             <SelectItem key={assistant.id} value={assistant.id}>
-                                                {name} • {model}
+                                                {name} - {model}
                                             </SelectItem>
                                         );
                                     })}
@@ -81,7 +86,7 @@ export const VapiFormFields = ({ form }: VapiFormFieldsProps) => {
                         {assistantsLoading && (
                             <p className="flex items-center gap-2 text-xs text-muted-foreground">
                                 <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
-                                Fetching assistants from Vapi…
+                                Fetching assistants from Vapi...
                             </p>
                         )}
 
@@ -107,6 +112,10 @@ export const VapiFormFields = ({ form }: VapiFormFieldsProps) => {
                         <FormLabel className="flex items-center gap-2">
                             <PhoneIcon className="h-4 w-4 text-muted-foreground" />
                             Phone number
+                            <InfoPopover title="Phone number">
+                                The selected number is shown to visitors when
+                                phone support is available.
+                            </InfoPopover>
                         </FormLabel>
 
                         <FormControl>
@@ -118,7 +127,7 @@ export const VapiFormFields = ({ form }: VapiFormFieldsProps) => {
                                 <SelectTrigger className="w-full">
                                     <SelectValue
                                         placeholder={
-                                            phoneNumbersLoading ? "Loading numbers…" : "Choose a phone number"
+                                            phoneNumbersLoading ? "Loading numbers..." : "Choose a phone number"
                                         }
                                     />
                                 </SelectTrigger>
@@ -132,7 +141,7 @@ export const VapiFormFields = ({ form }: VapiFormFieldsProps) => {
                                         const label = phoneNumber.name?.trim() || "No label";
                                         return (
                                             <SelectItem key={phoneNumber.id} value={number}>
-                                                {number} • {label}
+                                                {number} - {label}
                                             </SelectItem>
                                         );
                                     })}
@@ -147,7 +156,7 @@ export const VapiFormFields = ({ form }: VapiFormFieldsProps) => {
                         {phoneNumbersLoading && (
                             <p className="flex items-center gap-2 text-xs text-muted-foreground">
                                 <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
-                                Fetching phone numbers from Vapi…
+                                Fetching phone numbers from Vapi...
                             </p>
                         )}
 

@@ -27,6 +27,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/page-header";
+import { InfoPopover } from "@/components/info-popover";
 
 function getWebhookUrl() {
   const explicitUrl = process.env.NEXT_PUBLIC_CONVEX_HTTP_URL;
@@ -140,24 +142,14 @@ export const WhatsAppIntegrationView = () => {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 py-2">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-primary">
-            <MessageCircle size={20} />
-            <span className="text-sm font-semibold uppercase tracking-wider">
-              WhatsApp Integration
-            </span>
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold tracking-tight">
-              Connect WhatsApp to your knowledge base
-            </h1>
-            <p className="max-w-2xl text-lg text-muted-foreground">
-              Let customers message your WhatsApp number and receive answers from this organization&apos;s Vivia knowledge base.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          eyebrow="WhatsApp Integration"
+          title="Connect WhatsApp"
+          description="Let customers message your WhatsApp number and receive answers from this workspace's Vivia knowledge base."
+          icon={MessageCircle}
+        />
 
         <Badge
           variant={isConnected ? "default" : "outline"}
@@ -189,7 +181,13 @@ export const WhatsAppIntegrationView = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-3">
-              <Label htmlFor="phoneNumberId">Phone Number ID</Label>
+              <Label htmlFor="phoneNumberId" className="flex items-center gap-1.5">
+                Phone Number ID
+                <InfoPopover title="Phone Number ID">
+                  The Meta WhatsApp Cloud API identifier for the business phone
+                  number that should receive messages.
+                </InfoPopover>
+              </Label>
               <Input
                 id="phoneNumberId"
                 placeholder="Example: 123456789012345"
@@ -212,7 +210,14 @@ export const WhatsAppIntegrationView = () => {
             </div>
 
             <div className="grid gap-3">
-              <Label htmlFor="accessToken">Access Token</Label>
+              <Label htmlFor="accessToken" className="flex items-center gap-1.5">
+                Access token
+                <InfoPopover title="Access token">
+                  The Meta token used to send and receive WhatsApp messages.
+                  It is saved securely and only needs to be replaced when it
+                  expires or changes.
+                </InfoPopover>
+              </Label>
               <Input
                 id="accessToken"
                 type="password"
@@ -261,7 +266,13 @@ export const WhatsAppIntegrationView = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-2">
-                <Label>Callback URL</Label>
+                <Label className="flex items-center gap-1.5">
+                  Callback URL
+                  <InfoPopover title="Callback URL">
+                    Paste this URL into the webhook settings in your Meta app
+                    so WhatsApp can deliver incoming messages to Vivia.
+                  </InfoPopover>
+                </Label>
                 <div className="flex gap-2">
                   <Input readOnly value={webhookUrl} className="font-mono text-sm" />
                   <Button
@@ -275,7 +286,13 @@ export const WhatsAppIntegrationView = () => {
               </div>
 
               <div className="grid gap-2">
-                <Label>Verify Token</Label>
+                <Label className="flex items-center gap-1.5">
+                  Verify token
+                  <InfoPopover title="Verify token">
+                    Meta uses this token once to confirm that the callback URL
+                    belongs to your Vivia workspace.
+                  </InfoPopover>
+                </Label>
                 <div className="flex gap-2">
                   <Input
                     readOnly

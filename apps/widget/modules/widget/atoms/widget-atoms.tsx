@@ -30,7 +30,7 @@ export const loadingMessageAtom = atom<string | null>(null);
  * Stores the ID of the current user's session.
  * 
  * We use 'atomWithStorage' so that if the user refreshes their browser, 
- * they don't get logged out—the ID is saved in their local storage.
+ * they don't get logged out. The ID is saved in their local storage.
  */
 export const contactSessionIdAtom =
   atomWithStorage<Id<"contact_sessions"> | null>(

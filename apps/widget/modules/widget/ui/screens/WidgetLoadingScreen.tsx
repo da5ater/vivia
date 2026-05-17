@@ -220,9 +220,11 @@ export const WidgetLoadingScreen = ({ slug }: WidgetLoadingScreenProps) => {
     <div className="flex flex-col h-full">
       {/* Header showing the organization name and welcome message */}
       <WidgetHeader>
-        <div className="flex flex-col justify-between gap-y-2 px-2 py-4 font-semibold">
-          <p className="text-2xl">{formatViviaOrganizationName(widgetSettings?.organizationName)}</p>
-          <p className="text-lg">{widgetSettings?.greetMessage || "We are getting everything ready for you."}</p>
+        <div className="flex flex-col justify-between gap-y-2 px-1 py-3 font-semibold">
+          <p className="text-xl leading-tight">{formatViviaOrganizationName(widgetSettings?.organizationName)}</p>
+          <p className="text-sm font-normal leading-5 opacity-90">
+            {widgetSettings?.greetMessage || "We are getting everything ready for you."}
+          </p>
         </div>
       </WidgetHeader>
 

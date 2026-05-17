@@ -152,10 +152,10 @@ export const DashboardView = () => {
         </div>
         <h1 className="text-3xl font-bold text-foreground tracking-tight">
           {greeting()}
-          {user?.firstName ? `, ${user.firstName}` : ""} 👋
+          {user?.firstName ? ', ' + user.firstName : ''}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Here&apos;s a quick summary of what&apos;s happening in your Vivia workspace recently.
+          Here&apos;s what needs attention across your Vivia workspace.
         </p>
       </div>
 

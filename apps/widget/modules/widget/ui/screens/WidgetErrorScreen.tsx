@@ -13,9 +13,11 @@ export const WidgetErrorScreen = () => {
   return (
     <div className="flex flex-col h-full">
       <WidgetHeader>
-        <div className="flex flex-col justify-between gap-y-2 px-2 py-6 font-semibold">
-          <p className="text-3xl">{formatViviaOrganizationName(widgetSettings?.organizationName)}</p>
-          <p className="text-lg">Something needs a quick refresh.</p>
+        <div className="flex flex-col justify-between gap-y-2 px-1 py-3 font-semibold">
+          <p className="text-xl leading-tight">{formatViviaOrganizationName(widgetSettings?.organizationName)}</p>
+          <p className="text-sm font-normal leading-5 opacity-90">
+            Something needs a quick refresh.
+          </p>
         </div>
       </WidgetHeader>
 

@@ -116,7 +116,7 @@ export const useVapi = () => {
             return [...prev, { role: "assistant", text: accumulated }];
           });
         } else {
-          // User transcripts — keep existing logic (each final utterance is its own message).
+          // User transcripts stay as separate final utterances.
           setTranscript((prev) => {
             const last = prev[prev.length - 1];
             if (last?.role === role && last?.text === transcriptText) return prev;

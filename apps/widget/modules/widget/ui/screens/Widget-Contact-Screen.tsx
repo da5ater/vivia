@@ -33,7 +33,7 @@ export const WidgetContactScreen = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // clipboard not available — silently ignore
+      // Clipboard may be unavailable in some embedded browser contexts.
     }
   };
 
