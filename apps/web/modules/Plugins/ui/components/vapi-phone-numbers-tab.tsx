@@ -65,7 +65,7 @@ export const VapiPhoneNumbersTab = () => {
                                 </TableRow>
                             )
                         }
-                        return phoneNumbers.map((phoneNumber) => (
+                        return phoneNumbers.map((phoneNumber: any) => (
                             <TableRow className="hover:bg-muted/50" key={phoneNumber.id}>
                                 <TableCell className="px-6 py-4">
                                     <div className="flex items-center gap-3">

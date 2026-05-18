@@ -10,8 +10,8 @@ const SUMMARIZE_PROMPT = `
 You are a summarization assistant for support conversations.
 Read the transcript and return valid JSON only, with exactly two fields:
 {
-  "summary": "<short summary in 1-2 sentences>",
-  "tags": ["tag1", "tag2"]
+  "summary": "<short summary in 1-4 sentences>",
+  "tags": ["tag1", "tag2", "tag3"]
 }
 Tags should be short topic labels in lowercase without punctuation.
 `;
@@ -54,17 +54,22 @@ Transcript:
 ${transcript}
 `;
 
-    const response = await generateText({
-      model: getModel("summarizer") as LanguageModel,
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-    });
-
-    const raw = response.text.trim();
+    let raw = "";
+    try {
+      const response = await generateText({
+        model: getModel("summarizer") as LanguageModel,
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+      });
+      raw = response.text.trim();
+    } catch (err) {
+      console.error("Failed to generate text for summarization:", err);
+      raw = JSON.stringify({ summary: "Conversation ended.", tags: [] });
+    }
 
     let parsed: { summary?: string; tags?: string[] } = {};
     try {

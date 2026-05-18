@@ -12,6 +12,7 @@ import {
   PaletteIcon,
   PlugIcon,
   SettingsIcon,
+  LightbulbIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -33,6 +34,7 @@ import { cn } from "@workspace/ui/lib/utils";
 const customerSupportItems = [
   { label: "Overview", href: "/", icon: LayoutDashboardIcon },
   { label: "Conversations", href: "/conversations", icon: InboxIcon },
+  { label: "Insights", href: "/insights", icon: LightbulbIcon },
   { label: "Knowledge Base", href: "/files", icon: LibraryBigIcon },
 ];
 

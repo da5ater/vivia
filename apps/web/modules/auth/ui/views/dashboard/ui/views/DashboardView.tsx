@@ -241,7 +241,7 @@ export const DashboardView = () => {
                 </p>
               </div>
             ) : (
-              recentConvs.map((conv, idx) => {
+              recentConvs.map((conv, idx: number) => {
                 const s =
                   statusConfig[conv.status as ConvStatus] ?? statusConfig.unresolved;
                 const StatusIcon = s.icon;

@@ -318,7 +318,7 @@ export const ConversationsViewId = ({
                       </div>
                       {conversation.tags?.length ? (
                         <div className="flex flex-wrap gap-2 pt-2">
-                          {conversation.tags.map((tag) => (
+                          {conversation.tags.map((tag: string) => (
                             <Badge key={tag} variant="secondary">
                               {tag}
                             </Badge>

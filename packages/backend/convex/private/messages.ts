@@ -128,7 +128,8 @@ export const enhanceResponse = action({
         code: "unauthorized",
       });
     }
-    const response = await generateText({
+    try {
+      const response = await generateText({
       // Use provider directly (not Vercel AI Gateway)
       model: getModel("enhancer") as LanguageModel,
       messages: [
@@ -145,5 +146,9 @@ export const enhanceResponse = action({
 
     // 3. Return the text directly (Action does not write to DB)
     return response.text;
+    } catch (error) {
+      console.error("Error enhancing response:", error);
+      throw new ConvexError("Failed to enhance response. The AI service might be temporarily unavailable.");
+    }
   },
 });

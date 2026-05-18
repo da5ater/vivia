@@ -66,7 +66,7 @@ export const VapiFormFields = ({ form }: VapiFormFieldsProps) => {
                                 <SelectContent>
                                     <SelectItem value="none">None</SelectItem>
 
-                                    {assistants?.map((assistant) => {
+                                    {assistants?.map((assistant: any) => {
                                         const name = assistant.name?.trim() || "Unnamed assistant";
                                         const model = assistant.model?.model?.trim() || "Unknown model";
                                         return (
@@ -135,7 +135,7 @@ export const VapiFormFields = ({ form }: VapiFormFieldsProps) => {
                                 <SelectContent>
                                     <SelectItem value="none">None</SelectItem>
 
-                                    {phoneNumbers?.map((phoneNumber) => {
+                                    {phoneNumbers?.map((phoneNumber: any) => {
                                         const number = phoneNumber.number?.trim();
                                         if (!number) return null; // Only allow valid numbers to be saved
                                         const label = phoneNumber.name?.trim() || "No label";
