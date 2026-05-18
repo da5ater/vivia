@@ -138,6 +138,8 @@ export const getOne = query({
   },
 });
 
+import { internal } from "../_generated/api.js";
+
 export const updateStatus = mutation({
   args: {
     conversationId: v.id("conversations"),
@@ -169,6 +171,14 @@ export const updateStatus = mutation({
     }
 
     await ctx.db.patch(conversationId, { status });
+
+    if (status === "resolved" || status === "escalated") {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.summarize.summarizeConversation,
+        { threadId: conversation.threadId }
+      );
+    }
   },
 });
 
@@ -199,5 +209,24 @@ export const getStats = query({
     }
 
     return { total, unresolved, resolved, escalated };
+  },
+});
+
+export const triggerSummarization = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+  },
+  handler: async (ctx, { conversationId }) => {
+    const user = await requireCurrentUser(ctx);
+    if (!user) throw new ConvexError({ message: "User not found", code: "not_found" });
+
+    const conversation = await ctx.db.get(conversationId);
+    if (!conversation || conversation.organizationId !== user._id) {
+      throw new ConvexError({ message: "Conversation not found", code: "not_found" });
+    }
+
+    await ctx.scheduler.runAfter(0, internal.summarize.summarizeConversation, {
+      threadId: conversation.threadId,
+    });
   },
 });

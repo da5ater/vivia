@@ -8,6 +8,7 @@ import { useAction, useMutation, useQuery } from "convex/react";
 import {
   CheckIcon,
   ChevronRightIcon,
+  ChevronDownIcon,
   Clock3Icon,
   CopyIcon,
   HeadphonesIcon,
@@ -45,6 +46,14 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
 import { cn } from "@workspace/ui/lib/utils";
 import { Badge } from "@workspace/ui/components/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@workspace/ui/components/dialog";
 import { ConversationStatusBadge, type ConversationStatus } from "@/components/conversation-status-badge";
 import { InfoPopover } from "@/components/info-popover";
 import { useConversationLayoutControls } from "@/modules/auth/ui/views/dashboard/ui/layouts/conversation-id-layout";
@@ -108,6 +117,7 @@ export const ConversationsViewId = ({
   const createMessage = useAction(api.private.messages.create);
   const updateStatus = useMutation(api.private.conversations.updateStatus);
   const enhanceResponse = useAction(api.private.messages.enhanceResponse);
+  const triggerSummarization = useMutation(api.private.conversations.triggerSummarization);
   const {
     isConversationExpanded,
     toggleConversationExpanded,
@@ -115,6 +125,7 @@ export const ConversationsViewId = ({
 
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
   const messages = useThreadMessages(
@@ -186,6 +197,18 @@ export const ConversationsViewId = ({
     }
   };
 
+  const handleGenerateSummary = async () => {
+    setIsGeneratingSummary(true);
+    try {
+      await triggerSummarization({ conversationId });
+      toast.success("Summary generation started. It will appear in a few seconds.");
+    } catch (error) {
+      toast.error("Failed to generate summary");
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
+
   const handleCopyMessage = async (messageId: string, text: string) => {
     if (!navigator?.clipboard) return;
 
@@ -231,30 +254,96 @@ export const ConversationsViewId = ({
                 <h1 className="truncate text-base font-semibold tracking-tight text-foreground">
                   {contactName}
                 </h1>
-                <ConversationStatusBadge status={status} />
-                <InfoPopover title="Message direction" className="size-6">
+                <InfoPopover title="Message direction" className="size-5 text-muted-foreground/60">
                   Visitor messages appear on the left. Your replies appear on
                   the right. Message text follows the detected language
                   direction automatically.
                 </InfoPopover>
               </div>
-              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[13px] text-muted-foreground/80">
                 {contactEmail ? (
-                  <span className="flex min-w-0 items-center gap-1.5">
-                    <MailIcon className="size-3.5 shrink-0" />
+                  <>
                     <span className="truncate">{contactEmail}</span>
-                  </span>
+                    <span className="opacity-40">•</span>
+                  </>
                 ) : null}
-                <span className="flex items-center gap-1.5">
-                  <Clock3Icon className="size-3.5" />
-                  Started {createdAgo}
-                </span>
+                <span>Started {createdAgo}</span>
+                <span className="opacity-40">•</span>
                 <span>{messageCount} messages</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 self-start xl:self-auto">
+          <div className="flex items-center gap-2 self-start xl:self-auto">
+            {/* Compact status cycle button — icon + chevron, no loud color */}
+            <Hint text={nextStatusLabel[status]} side="bottom">
+              <Button
+                type="button"
+                variant="outline"
+                size="default"
+                onClick={handleToggleStatus}
+                disabled={isUpdatingStatus}
+                className="gap-2 border-border/60 bg-background px-3 font-medium text-muted-foreground shadow-sm hover:border-border hover:text-foreground"
+                aria-label={nextStatusLabel[status]}
+              >
+                <ConversationStatusBadge status={status} className="border-0 bg-transparent p-0 shadow-none text-[13px]" />
+                <ChevronRightIcon className="size-3.5 opacity-50" />
+              </Button>
+            </Hint>
+
+            {/* AI Summary Button */}
+            {(isResolved || isEscalated) ? (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="h-7 gap-1 px-2.5 text-[11px] shadow-none text-sky-600 border-sky-200 bg-sky-50 hover:bg-sky-100 hover:text-sky-700 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-400 dark:hover:bg-sky-500/20">
+                    <Wand2Icon className="size-3" />
+                    AI Summary
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <Wand2Icon className="size-4 text-sky-500" />
+                      Conversation Summary
+                    </DialogTitle>
+                    <DialogDescription>
+                      Generated automatically by the AI assistant.
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  {conversation?.summary || conversation?.tags?.length ? (
+                    <>
+                      <div className="py-2 text-sm leading-relaxed text-foreground">
+                        {conversation.summary}
+                      </div>
+                      {conversation.tags?.length ? (
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {conversation.tags.map((tag) => (
+                            <Badge key={tag} variant="secondary">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : null}
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-6 text-center">
+                      <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-sky-50 dark:bg-sky-500/10">
+                        <Wand2Icon className="size-5 text-sky-500" />
+                      </div>
+                      <h3 className="text-sm font-medium mb-1">No summary available</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        This conversation doesn't have an AI-generated summary yet.
+                      </p>
+                      <Button onClick={handleGenerateSummary} disabled={isGeneratingSummary} size="sm" className="bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-500 dark:hover:bg-sky-600">
+                        {isGeneratingSummary ? "Generating..." : "Generate Summary"}
+                      </Button>
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
+            ) : null}
+
             {/* Expand/minimize overlay */}
             <Hint
               text={isConversationExpanded ? "Return to split view" : "Expand conversation"}
@@ -265,7 +354,7 @@ export const ConversationsViewId = ({
                 variant="ghost"
                 size="icon-sm"
                 onClick={toggleConversationExpanded}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:bg-black/5 hover:text-foreground dark:hover:bg-white/5"
                 aria-label={isConversationExpanded ? "Return to split view" : "Expand conversation"}
               >
                 {isConversationExpanded ? (
@@ -275,62 +364,9 @@ export const ConversationsViewId = ({
                 )}
               </Button>
             </Hint>
-
-            {/* Compact status cycle button — icon + chevron, no loud color */}
-            <Hint text={nextStatusLabel[status]} side="bottom">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleToggleStatus}
-                disabled={isUpdatingStatus}
-                className="h-8 gap-1.5 border-border/60 bg-background px-2.5 text-xs font-medium text-muted-foreground shadow-xs hover:border-border hover:text-foreground"
-                aria-label={nextStatusLabel[status]}
-              >
-                <ConversationStatusBadge status={status} className="border-0 bg-transparent p-0 shadow-none" />
-                <ChevronRightIcon className="size-3 opacity-50" />
-              </Button>
-            </Hint>
           </div>
         </div>
       </header>
-
-      {(isResolved || isEscalated) && (
-        <div className="shrink-0 border-b border-border/60 bg-background px-4 py-3">
-          <div
-            className={cn(
-              "mx-auto flex max-w-4xl items-start gap-3 rounded-lg border px-3 py-2.5 text-sm",
-              banner.className
-            )}
-          >
-            <BannerIcon className="mt-0.5 size-4 shrink-0" />
-            <div>
-              <p className="font-semibold">{banner.title}</p>
-              <p className="mt-0.5 text-xs opacity-80">{banner.description}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {(conversation?.summary || conversation?.tags?.length) && (
-        <div className="shrink-0 border-b border-border/70 bg-background/95 px-4 py-4 backdrop-blur">
-          {conversation.summary && (
-            <p className="max-w-4xl text-sm leading-6 text-foreground">
-              {conversation.summary}
-            </p>
-          )}
-
-          {conversation.tags?.length ? (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {conversation.tags.map((tag) => (
-                <Badge key={tag} variant="secondary">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      )}
 
       <AIConversation className="min-h-0 flex-1">
         <AIConversationContent className="mx-auto flex w-full max-w-5xl flex-col px-4 py-6 lg:px-6">
@@ -467,73 +503,83 @@ export const ConversationsViewId = ({
         </AIConversationContent>
       </AIConversation>
 
+      {(isResolved || isEscalated) && (
+        <div className={cn("shrink-0 border-t flex items-center justify-center gap-3 px-4 py-2 text-sm shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)]", banner.className)}>
+          <BannerIcon className="size-4 shrink-0" />
+          <div className="flex items-center gap-1.5">
+            <span className="font-semibold">{banner.title}</span>
+            <span className="text-xs opacity-80">— {banner.description}</span>
+          </div>
+        </div>
+      )}
+
       <div className="shrink-0 border-t border-border/70 bg-background px-4 py-3">
         <Form {...form}>
           <AIInput
             className="mx-auto max-w-5xl rounded-xl border-border/70 p-2 shadow-sm"
             onSubmit={form.handleSubmit(onSubmit)}
           >
-              <FormField
-                control={form.control}
-                name="message"
-                render={({ field }) => (
-                  <AIInputTextarea
-                    {...field}
-                    minHeight={72}
-                    placeholder={
-                      isResolved
-                        ? "Reopen the conversation to reply"
-                        : `Reply to ${contactName}...`
+            <FormField
+              control={form.control}
+              name="message"
+              render={({ field }) => (
+                <AIInputTextarea
+                  {...field}
+                  minHeight={72}
+                  placeholder={
+                    isResolved
+                      ? "Reopen the conversation to reply"
+                      : `Reply to ${contactName}...`
+                  }
+                  disabled={isResolved || isSending}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      form.handleSubmit(onSubmit)();
                     }
-                    disabled={isResolved || isSending}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && !event.shiftKey) {
-                        event.preventDefault();
-                        form.handleSubmit(onSubmit)();
-                      }
-                    }}
-                  />
-                )}
-              />
+                  }}
+                />
+              )}
+            />
 
-              <div className="flex flex-col gap-2 px-1 pb-1 pt-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <span className="text-xs text-muted-foreground">
-                    Enter to send. Shift + Enter for a new line.
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-end gap-3">
-                  <span
-                    className={cn(
-                      "text-xs tabular-nums text-muted-foreground",
-                      draft.length > 1200 && "text-amber-600 dark:text-amber-300"
-                    )}
-                  >
-                    {draft.length}
-                  </span>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={!draft.trim() || isSending || isEnhancing || isResolved}
-                    onClick={handleEnhanceResponse}
-                    className="gap-2 shadow-xs"
-                  >
-                    <Wand2Icon className="size-4 text-sky-500" />
-                    {isEnhancing ? "Enhancing..." : "Enhance"}
-                  </Button>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={!canSend}
-                    className="min-w-24 bg-sky-600 text-white hover:bg-sky-700 dark:bg-sky-500 dark:text-slate-950 dark:hover:bg-sky-400"
-                  >
-                    <SendIcon className="size-4" />
-                    {isSending ? "Sending..." : "Send"}
-                  </Button>
-                </div>
+            <div className="flex flex-col gap-2 px-1 pb-1 pt-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  Enter to send. Shift + Enter for a new line.
+                </span>
               </div>
+
+              <div className="flex items-center justify-end gap-3">
+                <span
+                  className={cn(
+                    "text-xs tabular-nums text-muted-foreground",
+                    draft.length > 1200 && "text-amber-600 dark:text-amber-300"
+                  )}
+                >
+                  {draft.length}
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={!draft.trim() || isSending || isEnhancing || isResolved}
+                  onClick={handleEnhanceResponse}
+                  className="gap-2 shadow-xs"
+                >
+                  <Wand2Icon className="size-4 text-sky-500" />
+                  {isEnhancing ? "Enhancing..." : "Enhance"}
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={!canSend}
+                  className="min-w-24 bg-sky-600 text-white hover:bg-sky-700 dark:bg-sky-500 dark:text-slate-950 dark:hover:bg-sky-400"
+                >
+                  <SendIcon className="size-4" />
+                  {isSending ? "Sending..." : "Send"}
+                </Button>
+              </div>
+            </div>
           </AIInput>
         </Form>
       </div>

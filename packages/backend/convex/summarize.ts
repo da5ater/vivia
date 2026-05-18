@@ -1,4 +1,4 @@
-import { action } from "./_generated/server.js";
+import { internalAction } from "./_generated/server.js";
 import { v } from "convex/values";
 import { generateText } from "ai";
 import type { LanguageModel } from "ai";
@@ -17,7 +17,7 @@ Tags should be short topic labels in lowercase without punctuation.
 `;
 
 async function getFullThreadTranscript(ctx: Parameters<typeof supportAgent.listMessages>[0], threadId: string) {
-  const messages: Array<{ role: string; content: string }> = [];
+  const messages: Array<any> = [];
   let cursor: string | null = null;
 
   while (true) {
@@ -32,11 +32,15 @@ async function getFullThreadTranscript(ctx: Parameters<typeof supportAgent.listM
   }
 
   return messages
-    .map((message) => `${message.role.toUpperCase()}: ${message.content}`)
+    .map((msg) => {
+      const role = msg.message?.role || msg.role || "user";
+      const content = msg.text || msg.message?.content || "";
+      return `${String(role).toUpperCase()}: ${content}`;
+    })
     .join("\n\n");
 }
 
-export const summarizeConversation = action({
+export const summarizeConversation = internalAction({
   args: {
     threadId: v.string(),
   },
@@ -51,7 +55,7 @@ ${transcript}
 `;
 
     const response = await generateText({
-      model: getModel("enhancer") as LanguageModel,
+      model: getModel("summarizer") as LanguageModel,
       messages: [
         {
           role: "user",
@@ -64,19 +68,24 @@ ${transcript}
 
     let parsed: { summary?: string; tags?: string[] } = {};
     try {
-      parsed = JSON.parse(raw);
-    } catch {
-      const match = raw.match(/\{[\s\S]*\}/);
-      if (!match) {
-        throw new Error("Unable to parse summarization response");
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        const match = raw.match(/\{[\s\S]*\}/);
+        if (match) {
+          parsed = JSON.parse(match[0]);
+        } else {
+          console.error("No JSON object found in summarization response.");
+        }
       }
-      parsed = JSON.parse(match[0]);
+    } catch (err) {
+      console.error("Failed to parse summarization response:", err);
     }
 
     const summary = parsed.summary?.trim() ?? "";
     const tags =
       Array.isArray(parsed.tags) && parsed.tags.every((tag) => typeof tag === "string")
-        ? parsed.tags.map((tag) => tag.trim()).filter(Boolean)
+        ? Array.from(new Set(parsed.tags.map((tag) => tag.trim()).filter(Boolean)))
         : [];
 
     await ctx.runMutation(internal.system.conversations.saveSummary, {

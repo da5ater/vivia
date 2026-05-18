@@ -1,21 +1,26 @@
 import { google } from "@ai-sdk/google";
+import { createGroq } from "@ai-sdk/groq";
 
-type ModelPurpose = "agent" | "interpreter" | "enhancer";
+const groq = createGroq({
+  apiKey: process.env.GROQ_API_KEY,
+});
+
+type ModelPurpose = "agent" | "interpreter" | "enhancer" | "summarizer";
 
 /**
  * Centralized model configuration to easily swap models and manage quotas.
  */
-const MODEL_IDS: Record<ModelPurpose, Parameters<typeof google>[0]> = {
-  // Primary model for the support agent
-  agent: "gemini-2.5-flash",
-
-  // Model for interpreting search results (can be cheaper/faster)
-  interpreter: "gemini-2.5-flash",
-
-  // Model for enhancing operator messages
-  enhancer: "gemini-2.5-flash-lite",
-};
-
 export function getModel(purpose: ModelPurpose): unknown {
-  return google(MODEL_IDS[purpose]);
+  switch (purpose) {
+    case "agent":
+      return google("gemini-2.5-flash");
+    case "interpreter":
+      return google("gemini-2.5-flash");
+    case "enhancer":
+      return google("gemini-2.5-flash-lite");
+    case "summarizer":
+      return groq("llama-3.1-8b-instant");
+    default:
+      throw new Error(`Unknown model purpose: ${purpose}`);
+  }
 }

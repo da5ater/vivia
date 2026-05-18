@@ -79,6 +79,12 @@ export const resolve = internalMutation({
             "I've marked this conversation as resolved. If you need anything else, you can start a new chat anytime.",
         },
       });
+
+      await ctx.scheduler.runAfter(
+        0,
+        internal.summarize.summarizeConversation,
+        { threadId }
+      );
     }
   },
 });
@@ -109,6 +115,12 @@ export const escalate = internalMutation({
             "I've connected you with our support team. A team member will follow up here soon.",
         },
       });
+
+      await ctx.scheduler.runAfter(
+        0,
+        internal.summarize.summarizeConversation,
+        { threadId }
+      );
     }
   },
 });
@@ -118,8 +130,16 @@ export const saveSummary = internalMutation({
     threadId: v.string(),
     summary: v.optional(v.string()),
     tags: v.optional(v.array(v.string())),
+    metrics: v.optional(
+      v.object({
+        userSentiment: v.string(),
+        issueComplexity: v.string(),
+        resolutionTimeStatus: v.string(),
+      })
+    ),
+    suggestions: v.optional(v.array(v.string())),
   },
-  handler: async (ctx, { threadId, summary, tags }) => {
+  handler: async (ctx, { threadId, summary, tags, metrics, suggestions }) => {
     const conversation = await ctx.db
       .query("conversations")
       .withIndex("byThreadId", (q) => q.eq("threadId", threadId))
@@ -132,12 +152,8 @@ export const saveSummary = internalMutation({
     await ctx.db.patch(conversation._id, {
       summary,
       tags,
+      metrics,
+      suggestions,
     });
-
-    await ctx.scheduler.runAfter(
-      0,
-      internal.summarize.summarizeConversation,
-      { threadId }
-    );
   },
 });
