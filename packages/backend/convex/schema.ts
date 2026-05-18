@@ -151,14 +151,6 @@ const schema = defineSchema({
     createdAt: v.number(),
     summary: v.optional(v.string()),
     tags: v.optional(v.array(v.string())),
-    metrics: v.optional(
-      v.object({
-        userSentiment: v.string(),
-        issueComplexity: v.string(),
-        resolutionTimeStatus: v.string(),
-      })
-    ),
-    suggestions: v.optional(v.array(v.string())),
   })
     .index("byOrganizationId", ["organizationId"])
     .index("byOrganizationIdAndStatus", ["organizationId", "status"])
