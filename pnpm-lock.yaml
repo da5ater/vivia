@@ -245,6 +245,9 @@ importers:
       convex-helpers:
         specifier: ^0.1.106
         version: 0.1.106(@standard-schema/spec@1.1.0)(convex@1.29.3(@clerk/clerk-react@5.57.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@6.0.3)(zod@3.25.67)
+      papaparse:
+        specifier: ^5.5.4
+        version: 5.5.4
       svix:
         specifier: ^1.89.0
         version: 1.89.0
@@ -255,6 +258,9 @@ importers:
       '@types/node':
         specifier: ^20.19.9
         version: 20.19.25
+      '@types/papaparse':
+        specifier: ^5.5.2
+        version: 5.5.2
       '@workspace/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
@@ -3288,6 +3294,9 @@ packages:
   '@types/node@25.6.0':
     resolution: {integrity: sha512-+qIYRKdNYJwY3vRCZMdJbPLJAtGjQBudzZzdzwQYkEPQd+PJGixUL5QfvCLDaULoLv+RhT3LDkwEfKaAkgSmNQ==}
 
+  '@types/papaparse@5.5.2':
+    resolution: {integrity: sha512-gFnFp/JMzLHCwRf7tQHrNnfhN4eYBVYYI897CGX4MY1tzY9l2aLkVyx2IlKZ/SAqDbB3I1AOZW5gTMGGsqWliA==}
+
   '@types/pg-pool@2.0.6':
     resolution: {integrity: sha512-TaAUE5rq2VQYxab5Ts7WZhKNmuN78Q6PiFonTDdpbx8a1H0M1vhy3rhiMjl+e2iHmogyMw7jZF4FrE6eJUy5HQ==}
 
@@ -5318,6 +5327,9 @@ packages:
 
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
+
+  papaparse@5.5.4:
+    resolution: {integrity: sha512-SwzWD9gl/ElwYLCI0nUja1mFJzjq2D8ziShfNBa7zCHzkOozeOGDwHWQ+tvCzEZcewecWZ5U7kUopDnG+DFYEQ==}
 
   param-case@2.1.1:
     resolution: {integrity: sha512-eQE845L6ot89sk2N8liD8HAuH4ca6Vvr7VWAWwt7+kvvG5aBcPmmphQ68JsEG2qa9n1TykS2DLeMt363AAH8/w==}
@@ -9666,6 +9678,10 @@ snapshots:
     dependencies:
       undici-types: 7.19.2
 
+  '@types/papaparse@5.5.2':
+    dependencies:
+      '@types/node': 20.19.31
+
   '@types/pg-pool@2.0.6':
     dependencies:
       '@types/pg': 8.15.6
@@ -12157,6 +12173,8 @@ snapshots:
       netmask: 2.0.2
 
   package-json-from-dist@1.0.1: {}
+
+  papaparse@5.5.4: {}
 
   param-case@2.1.1:
     dependencies:

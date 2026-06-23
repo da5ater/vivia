@@ -43,6 +43,8 @@ import { DeleteFileDialog } from "../components/delete-file-dialog";
 import { PublicFile } from "@workspace/backend/convex/private/files";
 import { PageHeader } from "@/components/page-header";
 import { InfoPopover } from "@/components/info-popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
+import { DynamicDataView } from "./dynamic-data-view";
 
 export const FilesView = () => {
   const files = usePaginatedQuery(
@@ -92,11 +94,19 @@ export const FilesView = () => {
       <div className="w-full space-y-8 py-2">
         <div className="mx-auto w-full max-w-5xl space-y-8">
           <PageHeader
-            eyebrow="Knowledge Base"
-            title="Documents"
-            description="Upload trusted content so Vivia can answer visitor questions from your business knowledge."
+            eyebrow="AI Assistant"
+            title="Knowledge Base"
+            description="Manage the static documents and dynamic data sources your AI uses to answer customer questions."
             icon={DatabaseIcon}
           />
+
+          <Tabs defaultValue="documents" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 lg:w-[400px] mb-8">
+              <TabsTrigger value="documents">Static Documents</TabsTrigger>
+              <TabsTrigger value="dynamic">Dynamic Data</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="documents" className="m-0">
 
           {/* Documents Card */}
           <Card className="border-border/60 shadow-md">
@@ -245,6 +255,12 @@ export const FilesView = () => {
               )}
             </CardContent>
           </Card>
+            </TabsContent>
+            
+            <TabsContent value="dynamic" className="m-0">
+              <DynamicDataView />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </>

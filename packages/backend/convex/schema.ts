@@ -157,6 +157,36 @@ const schema = defineSchema({
     .index("byContactSessionId", ["contactSessionId"])
     .index("byStatus", ["status"])
     .index("byThreadId", ["threadId"]),
+
+  /**
+   * Knowledge Sources Table
+   * 
+   * Stores connections to external dynamic knowledge bases like Google Sheets or Excel.
+   * This tells the sync engine where to fetch data from and when it was last updated.
+   */
+  knowledgeSources: defineTable({
+    organizationId: v.id("users"),
+    type: v.union(
+      v.literal("google_sheet_public"),
+      v.literal("google_sheet_private"),
+      v.literal("excel_upload")
+    ),
+    sourceUrl: v.optional(v.string()), // The original URL pasted by the user
+    sourceId: v.string(), // Extracted ID (e.g., the Google Sheet ID)
+    status: v.union(
+      v.literal("active"),
+      v.literal("syncing"),
+      v.literal("error"),
+      v.literal("paused")
+    ),
+    lastSyncedAt: v.optional(v.number()),
+    errorMessage: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("byOrganizationId", ["organizationId"])
+    .index("byType", ["type"])
+    .index("byOrganizationIdAndType", ["organizationId", "type"]),
 });
 
 export default schema;

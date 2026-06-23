@@ -23,14 +23,16 @@ export const INTEGRATIONS = [
 
 export type IntegrationId = (typeof INTEGRATIONS)[number]["id"];
 
+const WIDGET_URL = process.env.NEXT_PUBLIC_WIDGET_URL || "https://vivia-widget.vercel.app";
+
 export const HTML_SCRIPT =
-    '<script src="https://vivia-widget.vercel.app/widget.js" data-widget-slug="{{WIDGET_SLUG}}"></script>';
+    `<script src="${WIDGET_URL}/widget.js" data-widget-slug="{{WIDGET_SLUG}}"></script>`;
 
 export const REACT_SCRIPT =
-    '<script src="https://vivia-widget.vercel.app/widget.js" data-widget-slug="{{WIDGET_SLUG}}"></script>';
+    `<script src="${WIDGET_URL}/widget.js" data-widget-slug="{{WIDGET_SLUG}}"></script>`;
 
 export const NEXTJS_SCRIPT =
-    '<script src="https://vivia-widget.vercel.app/widget.js" data-widget-slug="{{WIDGET_SLUG}}"></script>';
+    `<script src="${WIDGET_URL}/widget.js" data-widget-slug="{{WIDGET_SLUG}}"></script>`;
 
 export const JAVASCRIPT_SCRIPT =
-    '<script src="https://vivia-widget.vercel.app/widget.js" data-widget-slug="{{WIDGET_SLUG}}"></script>';
+    `<script src="${WIDGET_URL}/widget.js" data-widget-slug="{{WIDGET_SLUG}}"></script>`;

@@ -9,6 +9,9 @@
  */
 
 import type * as constants from "../constants.js";
+import type * as crons from "../crons.js";
+import type * as dynamicKnowledge_crons from "../dynamicKnowledge/crons.js";
+import type * as dynamicKnowledge_publicGoogleSheet from "../dynamicKnowledge/publicGoogleSheet.js";
 import type * as http from "../http.js";
 import type * as lib_extractTextContent from "../lib/extractTextContent.js";
 import type * as lib_secrets from "../lib/secrets.js";
@@ -54,6 +57,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   constants: typeof constants;
+  crons: typeof crons;
+  "dynamicKnowledge/crons": typeof dynamicKnowledge_crons;
+  "dynamicKnowledge/publicGoogleSheet": typeof dynamicKnowledge_publicGoogleSheet;
   http: typeof http;
   "lib/extractTextContent": typeof lib_extractTextContent;
   "lib/secrets": typeof lib_secrets;
