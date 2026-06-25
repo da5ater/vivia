@@ -40,10 +40,10 @@ export const PluginCard = ({
 
                 <Image
                     alt="platform"
-                    className="object-contain"
+                    className="object-contain drop-shadow-sm"
                     height={40}
                     width={40}
-                    src="/logo.svg"
+                    src="/logo.png"
                 />
             </div>
 

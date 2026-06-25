@@ -205,13 +205,13 @@ export const DashboardSidebar = () => {
           )}
         >
           {/* Logo mark */}
-          <div className="flex items-center justify-center size-[30px] rounded-lg shrink-0 bg-primary/10 border border-primary/20 text-primary transition-all duration-300 ml-[2px]">
+          <div className="flex items-center justify-center size-[30px] shrink-0 transition-all duration-300 ml-[2px]">
             <Image
-              src="/vivia-logo.jpeg"
+              src="/logo.png"
               alt="Vivia"
-              width={18}
-              height={18}
-              className="rounded-[5px]"
+              width={26}
+              height={26}
+              className="object-contain drop-shadow-sm"
             />
           </div>
 

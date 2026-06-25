@@ -203,9 +203,9 @@ export const WidgetChatScreen = () => {
           <div className="relative shrink-0">
             <DiceBearAvatar
               seed="assistant"
-              imageUrl="/vivia-logo.png"
-              imageClassName="object-contain p-0.5"
-              className="size-9 border-2 border-white/20"
+              imageUrl="/logo.png"
+              imageClassName="object-contain p-0.5 drop-shadow-sm"
+              className="size-9 bg-transparent"
             />
             <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-background bg-green-500" />
           </div>
@@ -278,9 +278,9 @@ export const WidgetChatScreen = () => {
                   {!isUser && isLast && (
                     <DiceBearAvatar
                       seed="assistant"
-                      imageUrl="/vivia-logo.png"
-                      imageClassName="object-contain p-0.5"
-                      className="mb-1 self-end"
+                      imageUrl="/logo.png"
+                      imageClassName="object-contain p-0.5 drop-shadow-sm"
+                      className="mb-1 self-end bg-transparent"
                     />
                   )}
                 </AIMessage>
