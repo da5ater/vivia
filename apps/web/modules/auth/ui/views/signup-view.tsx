@@ -11,7 +11,21 @@ export const SignUpView = () => {
           Set up your support widget and start helping visitors.
         </p>
       </div>
-      <SignUp routing="hash" appearance={{ elements: { header: "hidden" } }} />
+      <div className="flex w-full items-center justify-center px-4 py-6">
+        <SignUp 
+          routing="hash" 
+          appearance={{ 
+            elements: { 
+              header: "hidden", 
+              rootBox: "w-full", 
+              cardBox: "shadow-none border-none bg-transparent w-full m-0 p-0",
+              main: "flex flex-col w-full gap-4",
+              formButtonPrimary: "w-full",
+              socialButtonsBlockButton: "w-full flex justify-center items-center"
+            } 
+          }} 
+        />
+      </div>
     </div>
   );
 };

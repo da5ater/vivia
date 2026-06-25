@@ -54,54 +54,38 @@ export const PremiumFeaturesOverlay = () => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 backdrop-blur-[2px]">
-            <div className="w-full max-w-[540px] rounded-[24px] border bg-background p-8 shadow-2xl">
-
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gradient-to-b from-transparent via-background/60 to-background/95 pb-12 pt-[15vh]">
+            <div className="w-full max-w-[420px] rounded-[24px] border border-border/80 bg-background/95 p-8 shadow-2xl backdrop-blur-md text-center mt-auto mb-12">
                 <div className="mb-6 flex justify-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full border bg-muted/40">
-                        <GemIcon className="size-7 text-muted-foreground" />
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full border border-primary/20 bg-primary/10 shadow-[0_0_15px_hsl(var(--primary)/0.1)]">
+                        <GemIcon className="size-7 text-primary" />
                     </div>
                 </div>
 
-                <div className="mb-8 text-center">
-                    <h2 className="text-2xl font-semibold tracking-tight">
-                        Premium Feature
+                <div className="mb-6 text-center">
+                    <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                        Unlock Vivia Pro
                     </h2>
-                    <p className="mt-2 text-muted-foreground">
-                        This feature requires a Pro subscription
+                    <p className="mt-3 text-[14.5px] text-muted-foreground leading-relaxed px-2">
+                        You've discovered a premium capability. Upgrade to elevate your support experience with our full suite of professional tools:
                     </p>
+                    <div className="mt-4 flex flex-wrap justify-center gap-2 px-1">
+                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">WhatsApp Cloud</span>
+                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">AI Insights</span>
+                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">Voice Agents</span>
+                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">Knowledge Base</span>
+                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">Custom Branding</span>
+                    </div>
                 </div>
 
-                <div className="space-y-4">
-                    {features.map((feature) => {
-                        const Icon = feature.icon;
-
-                        return (
-                            <div key={feature.title} className="flex items-start gap-4">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-lg border bg-muted/30">
-                                    <Icon className="size-5 text-muted-foreground" />
-                                </div>
-
-                                <div>
-                                    <h3 className="font-medium">{feature.title}</h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        {feature.description}
-                                    </p>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                <div className="mt-8">
+                <div className="mt-6">
                     <Button
                         onClick={handleBilling}
-                        className="h-12 w-full rounded-xl text-base font-medium"
+                        className="h-11 w-full rounded-xl text-base font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all"
                     >
-                        View Plans
+                        View Pro Plans
                     </Button>
                 </div>
-
             </div>
         </div>
     );

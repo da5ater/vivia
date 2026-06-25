@@ -8,12 +8,12 @@ const Page = () => {
     <Protect
       condition={(has) => has({ plan: "pro" })}
       fallback={
-        <>
-          <div className="pointer-events-none select-none blur-[2px]">
+        <div className="relative h-full w-full">
+          <div className="pointer-events-none select-none">
             <CustomizationView />
           </div>
           <PremiumFeaturesOverlay />
-        </>
+        </div>
       }
     >
       <CustomizationView />

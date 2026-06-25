@@ -5,6 +5,8 @@ import { api } from "@workspace/backend/convex/_generated/api";
 import { SparklesIcon, LightbulbIcon, RefreshCwIcon, InboxIcon, ClockIcon, CheckCircle2Icon, AlertCircleIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@workspace/ui/lib/utils";
+import { Protect } from "@clerk/nextjs";
+import { PremiumFeaturesOverlay } from "@/modules/billing/ui/components/premium-features-overlay";
 
 export default function InsightsPage() {
     const stats = useQuery(api.private.conversations.getStats);
@@ -65,7 +67,7 @@ export default function InsightsPage() {
         });
     };
 
-    return (
+    const content = (
         <div className="flex flex-col flex-1 gap-8 max-w-5xl mx-auto w-full p-6">
             {/* ── Header ── */}
             <div className="flex flex-col gap-2">
@@ -75,7 +77,7 @@ export default function InsightsPage() {
                         Intelligence
                     </p>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <h1 className="text-3xl font-bold text-foreground tracking-tight">
                         AI Insights & Analytics
                     </h1>
@@ -175,5 +177,21 @@ export default function InsightsPage() {
                 </div>
             </div>
         </div>
+    );
+
+    return (
+        <Protect
+            condition={(has) => has({ plan: "pro" })}
+            fallback={
+                <div className="relative h-full w-full">
+                    <div className="pointer-events-none select-none">
+                        {content}
+                    </div>
+                    <PremiumFeaturesOverlay />
+                </div>
+            }
+        >
+            {content}
+        </Protect>
     );
 }

@@ -162,22 +162,25 @@ const NavSection = ({
 
 // ─── DashboardSidebar ─────────────────────────────────────────────────────────
 
-export const DashboardSidebar = () => {
+export const DashboardSidebar = ({ className, isMobile }: { className?: string, isMobile?: boolean }) => {
   const pathname = usePathname();
   const [isMounted, setIsMounted] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsedState, setIsCollapsedState] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
     const storedState = localStorage.getItem("sidebar-collapsed");
     if (storedState !== null) {
-      setIsCollapsed(storedState === "true");
+      setIsCollapsedState(storedState === "true");
     }
   }, []);
 
+  const isCollapsed = isMobile ? false : isCollapsedState;
+
   const toggleSidebar = () => {
-    const newState = !isCollapsed;
-    setIsCollapsed(newState);
+    if (isMobile) return;
+    const newState = !isCollapsedState;
+    setIsCollapsedState(newState);
     localStorage.setItem("sidebar-collapsed", String(newState));
   };
 
@@ -191,8 +194,9 @@ export const DashboardSidebar = () => {
   return (
     <aside
       className={cn(
-        "h-full shrink-0 flex flex-col bg-transparent transition-[width] duration-300 ease-in-out relative group",
-        sidebarWidthClass
+        "hidden md:flex h-full shrink-0 flex-col bg-transparent transition-[width] duration-300 ease-in-out relative group",
+        sidebarWidthClass,
+        className
       )}
     >
       {/* ── Header ── */}
@@ -233,21 +237,23 @@ export const DashboardSidebar = () => {
       </div>
 
       {/* Toggle button overlapping right border */}
-      <button
-        onClick={toggleSidebar}
-        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        className={cn(
-          "absolute -right-3.5 top-1/2 -translate-y-1/2 z-50 flex items-center justify-center rounded-full w-7 h-12 border border-border/50 bg-background/95 backdrop-blur shadow-[0_0_8px_rgba(0,0,0,0.06)] text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-300",
-          "opacity-0 md:group-hover:opacity-100 focus:opacity-100"
-        )}
-      >
-        <ChevronLeftIcon
+      {!isMobile && (
+        <button
+          onClick={toggleSidebar}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           className={cn(
-            "size-[18px] transition-transform duration-300 ease-in-out",
-            isCollapsed && "rotate-180"
+            "absolute -right-3.5 top-1/2 -translate-y-1/2 z-50 flex items-center justify-center rounded-full w-7 h-12 border border-border/50 bg-background/95 backdrop-blur shadow-[0_0_8px_rgba(0,0,0,0.06)] text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-300",
+            "opacity-0 md:group-hover:opacity-100 focus:opacity-100"
           )}
-        />
-      </button>
+        >
+          <ChevronLeftIcon
+            className={cn(
+              "size-[18px] transition-transform duration-300 ease-in-out",
+              isCollapsed && "rotate-180"
+            )}
+          />
+        </button>
+      )}
 
       {/* ── Nav ── */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 flex flex-col gap-1 custom-scrollbar">
