@@ -105,6 +105,88 @@ http.route({
 });
 
 http.route({
+    path: "/messenger",
+    method: "GET",
+    handler: httpAction(async (ctx, request) => {
+        const url = new URL(request.url);
+        const mode = url.searchParams.get("hub.mode");
+        const verifyToken = url.searchParams.get("hub.verify_token");
+        const challenge = url.searchParams.get("hub.challenge");
+
+        if (mode !== "subscribe" || !verifyToken || !challenge) {
+            return new Response("Invalid verification request", { status: 400 });
+        }
+
+        const config = await ctx.runQuery(
+            internal.system.messenger.getByVerifyToken,
+            { verifyToken }
+        );
+
+        if (!config) {
+            return new Response("Verification failed", { status: 403 });
+        }
+
+        return new Response(challenge, { status: 200 });
+    }),
+});
+
+http.route({
+    path: "/messenger",
+    method: "POST",
+    handler: httpAction(async (ctx, request) => {
+        let payload: {
+            object?: string;
+            entry?: Array<{
+                id?: string;
+                messaging?: Array<{
+                    sender?: { id?: string };
+                    recipient?: { id?: string };
+                    message?: {
+                        mid?: string;
+                        text?: string;
+                    };
+                }>;
+            }>;
+        };
+
+        try {
+            payload = await request.json();
+        } catch {
+            return new Response("Invalid JSON", { status: 400 });
+        }
+
+        if (payload.object === "page") {
+            for (const entry of payload.entry ?? []) {
+                const pageId = entry.id;
+
+                if (!pageId) continue;
+
+                for (const event of entry.messaging ?? []) {
+                    if (!event.message?.text || !event.sender?.id) {
+                        continue;
+                    }
+
+                    try {
+                        await ctx.runAction(
+                            internal.system.messengerActions.handleIncomingMessage,
+                            {
+                                pageId,
+                                from: event.sender.id,
+                                text: event.message.text,
+                            }
+                        );
+                    } catch (error) {
+                        console.error("Messenger message handling failed:", error);
+                    }
+                }
+            }
+        }
+
+        return new Response("EVENT_RECEIVED", { status: 200 });
+    }),
+});
+
+http.route({
     path: "/clerk-webhook",
     method: "POST",
     handler: httpAction(async (ctx, request) => {

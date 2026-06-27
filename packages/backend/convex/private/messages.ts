@@ -10,6 +10,7 @@ import { getModel } from "../system/ai/models.js";
 import { OPERATOR_MESSAGE_ENHANCEMENT_PROMPT } from "../system/ai/constants.js";
 import { getSecretValue, parseSecretString } from "../lib/secrets.js";
 import { sendWhatsAppText } from "../lib/whatsapp.js";
+import { sendMessengerText } from "../lib/messenger.js";
 
 export const create = action({
   args: {
@@ -48,6 +49,7 @@ export const create = action({
     }
 
     const whatsappFrom = conversation.contactSession.metadata?.whatsappFrom;
+    const messengerId = conversation.contactSession.metadata?.messengerId;
 
     if (whatsappFrom) {
       const config = await ctx.runQuery(
@@ -73,6 +75,31 @@ export const create = action({
         phoneNumberId: config.phoneNumberId,
         accessToken: secretData.accessToken,
         to: whatsappFrom,
+        text: prompt,
+      });
+    } else if (messengerId) {
+      const config = await ctx.runQuery(
+        internal.system.messenger.getByOrganizationId,
+        { organizationId: conversation.organizationId }
+      );
+
+      if (!config || !config.isEnabled) {
+        throw new ConvexError("Messenger integration is not enabled");
+      }
+
+      const secretValue = await getSecretValue(
+        ctx,
+        `tenant/${config.organizationId}/messenger/${config.secretName}`
+      );
+      const secretData = parseSecretString<{ accessToken: string }>(secretValue);
+
+      if (!secretData?.accessToken) {
+        throw new ConvexError("Messenger access token not found");
+      }
+
+      await sendMessengerText({
+        accessToken: secretData.accessToken,
+        to: messengerId,
         text: prompt,
       });
     }

@@ -8,6 +8,7 @@ import {
   LayoutDashboardIcon,
   LibraryBigIcon,
   MessageCircle,
+  MessageSquare,
   Mic,
   PaletteIcon,
   PlugIcon,
@@ -43,6 +44,7 @@ const configurationItems = [
   { label: "Widget Customization", href: "/customization", icon: PaletteIcon },
   { label: "Integrations", href: "/integrations", icon: PlugIcon },
   { label: "WhatsApp", href: "/whatsapp-integration", icon: MessageCircle },
+  { label: "Messenger", href: "/messenger-integration", icon: MessageSquare },
   { label: "Voice Assistant", href: "/plugins/vapi", icon: Mic },
 ];
 

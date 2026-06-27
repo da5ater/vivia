@@ -90,6 +90,8 @@ const schema = defineSchema({
         timezone: v.optional(v.string()),
         whatsappFrom: v.optional(v.string()),
         whatsappName: v.optional(v.string()),
+        messengerId: v.optional(v.string()),
+        messengerName: v.optional(v.string()),
       })
     ),
   })
@@ -117,6 +119,27 @@ const schema = defineSchema({
   })
     .index("byOrganizationId", ["organizationId"])
     .index("byPhoneNumberId", ["phoneNumberId"])
+    .index("byVerifyToken", ["verifyToken"]),
+
+  /**
+   * Messenger Configs Table
+   *
+   * Stores non-secret Facebook Messenger API settings for each organization.
+   * The access token itself is stored in the secret manager and referenced by
+   * secretName so normal database reads never expose it.
+   */
+  messengerConfigs: defineTable({
+    organizationId: v.id("users"),
+    pageId: v.string(),
+    pageName: v.optional(v.string()),
+    verifyToken: v.string(),
+    secretName: v.string(),
+    isEnabled: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("byOrganizationId", ["organizationId"])
+    .index("byPageId", ["pageId"])
     .index("byVerifyToken", ["verifyToken"]),
 
   /**

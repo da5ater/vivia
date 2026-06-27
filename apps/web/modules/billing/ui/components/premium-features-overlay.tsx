@@ -71,6 +71,7 @@ export const PremiumFeaturesOverlay = () => {
                     </p>
                     <div className="mt-4 flex flex-wrap justify-center gap-2 px-1">
                         <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">WhatsApp Cloud</span>
+                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">Messenger</span>
                         <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">AI Insights</span>
                         <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">Voice Agents</span>
                         <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">Knowledge Base</span>
