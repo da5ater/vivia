@@ -5,8 +5,8 @@ import z from "zod";
 export const resolveConversation = createTool({
   description:
     "Resolve a conversation when the user is satisfied or asks to close.",
-  args: z.object({}),
-  handler: async (ctx) => {
+  inputSchema: z.object({}),
+  execute: async (ctx: any) => {
     if (!ctx.threadId) {
       throw new Error("Thread ID is required to resolve a conversation.");
     }

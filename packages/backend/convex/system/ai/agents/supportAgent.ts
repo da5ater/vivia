@@ -12,7 +12,7 @@ export const supportAgent = new Agent(components.agent, {
   // Define the model and provider
   // The Google provider automatically uses the GOOGLE_GENERATIVE_AI_API_KEY from your env variables
   name: "supportAgent",
-  languageModel: getModel("agent") as LanguageModel,
+  languageModel: getModel("agent") as any,
 
   // Initial System Prompt
   instructions: SUPPORT_AGENT_PROMPT,
@@ -21,8 +21,8 @@ export const supportAgent = new Agent(components.agent, {
     resolveConversation,
     search,
   },
-  stopWhen: (args) => {
-    if (args.steps.length >= 15) return true;
+  stopWhen: (args: any) => {
+    if (args.steps.length >= 10) return true;
     const lastStep = args.steps.at(-1);
     if (!lastStep) return false;
     return lastStep.toolCalls.some(

@@ -11,12 +11,12 @@ import { SEARCH_INTERPRETER_PROMPT } from "../constants";
 
 export const search = createTool({
     description: "Search for information in the knowledge base to help the user",
-    args: z.object({
+    inputSchema: z.object({
         query: z
             .string()
             .describe("The search query to find relevant info"),
     }),
-    handler: async (ctx, { query }) => {
+    execute: async (ctx: any, { query }: any) => {
         if (!ctx.threadId) {
             return "Missing thread ID";
         }

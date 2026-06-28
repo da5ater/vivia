@@ -1,5 +1,6 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createGroq } from "@ai-sdk/groq";
+import type { LanguageModel } from "ai";
 
 // Parse keys from environment variables (handles comma-separated lists or fallback to single key)
 export const getGeminiKeys = () => {
@@ -210,16 +211,17 @@ function createPooledModel(modelName: string, preferredProvider: "google" | "gro
   };
 
   return {
-    specificationVersion: "v2" as const,
+    specificationVersion: "v3" as const,
     provider: preferredProvider,
     modelId: modelName,
     defaultObjectGenerationMode: undefined,
+    supportedUrls: undefined,
     doGenerate: async (options: any) => tryCall("doGenerate", options),
     doStream: async (options: any) => tryCall("doStream", options),
-  };
+  } as any as LanguageModel;
 }
 
-export function getModel(purpose: ModelPurpose): unknown {
+export function getModel(purpose: ModelPurpose): LanguageModel {
   switch (purpose) {
     // Main support agent: needs strong tool-calling + reasoning → Gemini 2.5 Flash (Google-first)
     case "agent":
@@ -228,7 +230,7 @@ export function getModel(purpose: ModelPurpose): unknown {
     // Search result interpreter: fires on EVERY search tool call, needs to be FAST.
     // Groq Llama 3.3 70B responds in <2s vs gemini-2.5-flash's 15–30s (thinking overhead).
     case "interpreter":
-      return createPooledModel("gemini-2.5-flash", "groq");
+      return createPooledModel("gemini-2.5-flash", "google");
 
     // Operator message enhancer: fast, groq-first
     case "enhancer":

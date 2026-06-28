@@ -223,27 +223,8 @@ export const getMany = query({
 
     const result = await supportAgent.listMessages(ctx, { threadId, paginationOpts });
 
-    // BUG FIX: We cannot filter `result.page` because changing the array length 
-    // breaks Convex's usePaginatedQuery cursor logic, causing the UI to freeze and stop updating.
-    // Instead, we map over the messages and replace any "pending" message with a nice placeholder.
-    const mappedMessages = result.page.map((msg: any) => {
-      if (msg.status === "pending") {
-        return {
-          ...msg,
-          // Replace empty content with a nice typing indicator so the UI doesn't show "??"
-          message: {
-            role: "assistant",
-            content: "...",
-          },
-          text: "...",
-        };
-      }
-      return msg;
-    });
-
-    return {
-      ...result,
-      page: mappedMessages,
-    };
+    // Pass messages through as-is. The UI is responsible for rendering
+    // pending messages with a typing indicator based on msg.status === "pending".
+    return result;
   },
 });

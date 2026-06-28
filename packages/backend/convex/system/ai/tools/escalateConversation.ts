@@ -5,8 +5,8 @@ import z from "zod";
 export const escalateConversation = createTool({
   description:
     "Escalate a conversation when the user requests to speak to a human or needs urgent assistance.",
-  args: z.object({}),
-  handler: async (ctx) => {
+  inputSchema: z.object({}),
+  execute: async (ctx: any) => {
     if (!ctx.threadId) {
       throw new Error("Thread ID is required to escalate a conversation.");
     }
