@@ -123,8 +123,8 @@ export const WidgetChatScreen = () => {
     );
   }, [widgetSettings?.defaultSuggestions]);
 
-  const messages = useThreadMessages(
-    api.public.messages.getMany,
+  const messages: any = useThreadMessages(
+    api.public.messages.getMany as any,
     threadId && contactSessionId
       ? { threadId, contactSessionId }
       : "skip",
@@ -293,11 +293,11 @@ export const WidgetChatScreen = () => {
             {isAgentThinking && (
               <AIMessage from="assistant" className="mt-0.5 py-0">
                 <div className="flex max-w-[82%] flex-col gap-0.5 items-start">
-                  <AIMessageContent className="pt-2 pb-2">
-                    <span className="flex items-center gap-1.5 px-1 py-0.5">
-                      <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <AIMessageContent className="rounded-2xl rounded-bl-sm pt-2.5 pb-2.5 px-3">
+                    <span className="flex items-center gap-1.5 px-1">
+                      <span className="size-1.5 rounded-full bg-primary/50 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="size-1.5 rounded-full bg-primary/50 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="size-1.5 rounded-full bg-primary/50 animate-bounce" style={{ animationDelay: '300ms' }} />
                     </span>
                   </AIMessageContent>
                 </div>
