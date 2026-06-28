@@ -136,6 +136,9 @@ export const WidgetChatScreen = () => {
       typeof message.text === "string" && message.text.trim().length > 0
   );
 
+  const isAgentThinking =
+    messages.results?.[messages.results.length - 1]?.status === "pending";
+
   const handleBackToChat = () => {
     setConversationId(null);
     setScreen("selection");
@@ -286,6 +289,20 @@ export const WidgetChatScreen = () => {
                 </AIMessage>
               );
             })}
+
+            {isAgentThinking && (
+              <AIMessage from="assistant" className="mt-0.5 py-0">
+                <div className="flex max-w-[82%] flex-col gap-0.5 items-start">
+                  <AIMessageContent className="pt-2 pb-2">
+                    <span className="flex items-center gap-1.5 px-1 py-0.5">
+                      <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </span>
+                  </AIMessageContent>
+                </div>
+              </AIMessage>
+            )}
           </AIConversationContent>
 
           <AIConversationScrollButton />
