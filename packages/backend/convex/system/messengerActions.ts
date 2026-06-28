@@ -105,45 +105,30 @@ export const handleIncomingMessage = internalAction({
         reply = result.text?.trim() || null;
 
         // If result.text is empty, check the database. 
-        // This happens if a tool was called (like search) and the agent either output no text 
-        // or a different status was reached.
         if (!reply) {
-          const updatedConversation = await ctx.runQuery(
-            internal.system.conversations.getByThreadId,
-            { threadId: conversation.threadId }
-          ) as MessengerConversation | null;
+          const lastMessages = await ctx.runQuery(components.agent.messages.listMessagesByThreadId, {
+            threadId: conversation.threadId,
+            order: "desc",
+            paginationOpts: { numItems: 5, cursor: null },
+          });
+          const newestAssistant = lastMessages?.page?.find(
+            (m: any) => (m.message?.role ?? m.role) === "assistant" && m.status !== "pending" && m.text !== "Messenger conversation started."
+          );
 
-          const updatedStatus = updatedConversation?.status ?? conversation.status;
-
-          if (updatedStatus === "unresolved") {
-            // Find the most recent assistant message generated during this execution
-            const lastMessages = await ctx.runQuery(components.agent.messages.listMessagesByThreadId, {
-              threadId: conversation.threadId,
-              order: "desc",
-              paginationOpts: { numItems: 5, cursor: null },
-            });
-            const newestAssistant = lastMessages?.page?.find(
-              (m: any) => (m.message?.role ?? m.role) === "assistant" && m.status !== "pending" && m.text !== "Messenger conversation started."
-            );
-
-            if (newestAssistant && newestAssistant.message?.content) {
-              // Agent wrote to DB directly (e.g. via tool loop output) but text was empty on the return object
-              const content = newestAssistant.message.content;
-              if (typeof content === "string") {
-                reply = content;
-              } else if (Array.isArray(content)) {
-                const textPart = content.find((p: any) => p.type === "text") as { text: string } | undefined;
-                reply = textPart?.text || "Thanks for your message. How can I help you today?";
-              } else {
-                reply = "Thanks for your message. How can I help you today?";
-              }
+          if (newestAssistant && newestAssistant.message?.content) {
+            // Agent wrote to DB directly (e.g. via tool loop output) but text was empty on the return object
+            const content = newestAssistant.message.content;
+            if (typeof content === "string") {
+              reply = content;
+            } else if (Array.isArray(content)) {
+              const textPart = content.find((p: any) => p.type === "text") as { text: string } | undefined;
+              reply = textPart?.text || "Thanks for your message. How can I help you today?";
             } else {
-              // Truly empty reply, no DB message found either
               reply = "Thanks for your message. How can I help you today?";
             }
           } else {
-            // Tool was called (resolved/escalated) — tool already wrote the message, skip reply
-            reply = null;
+            // Truly empty reply, no DB message found either
+            reply = "Thanks for your message. How can I help you today?";
           }
         }
       } catch (error) {
