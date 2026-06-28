@@ -16,6 +16,9 @@ import {
   ClockIcon,
   ZapIcon,
   SparklesIcon,
+  GlobeIcon,
+  PhoneCallIcon,
+  MessageCircleIcon,
 } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { useUser } from "@clerk/nextjs";
@@ -135,6 +138,17 @@ export const DashboardView = () => {
   // recent 5
   const recentConvs = recentConvsQuery?.page ?? [];
   const isLoadingRecent = recentConvsQuery === undefined;
+
+  // Channel stats
+  const channelStats = stats?.channelStats ?? { web: 0, whatsapp: 0, messenger: 0 };
+  const webCount = channelStats.web || 0;
+  const whatsappCount = channelStats.whatsapp || 0;
+  const messengerCount = channelStats.messenger || 0;
+  const totalChannelCount = webCount + whatsappCount + messengerCount || 1;
+
+  const webPercent = Math.round((webCount / totalChannelCount) * 100);
+  const whatsappPercent = Math.round((whatsappCount / totalChannelCount) * 100);
+  const messengerPercent = Math.round((messengerCount / totalChannelCount) * 100);
 
 
   return (
@@ -341,6 +355,49 @@ export const DashboardView = () => {
               bgClassName="bg-orange-100 dark:bg-orange-500/20"
               iconClassName="text-orange-600 dark:text-orange-400"
             />
+          </div>
+        </section>
+
+        {/* Live Channel Share Widget */}
+        <section className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 shadow-sm">
+            <h3 className="text-sm font-semibold text-foreground tracking-tight flex items-center gap-2">
+              <ZapIcon className="size-4 text-amber-500" />
+              Live Channel Share
+            </h3>
+            {stats === undefined ? (
+              <div className="space-y-3 animate-pulse">
+                <div className="h-5 bg-muted/40 rounded" />
+                <div className="h-5 bg-muted/40 rounded" />
+                <div className="h-5 bg-muted/40 rounded" />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground flex items-center gap-1.5"><GlobeIcon className="size-3 text-sky-500"/> Web Chat</span>
+                  <span className="font-semibold text-foreground">{webPercent}%</span>
+                </div>
+                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-sky-500 rounded-full transition-all duration-500" style={{ width: `${webPercent}%` }} />
+                </div>
+
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground flex items-center gap-1.5"><PhoneCallIcon className="size-3 text-emerald-500"/> WhatsApp</span>
+                  <span className="font-semibold text-foreground">{whatsappPercent}%</span>
+                </div>
+                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${whatsappPercent}%` }} />
+                </div>
+
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground flex items-center gap-1.5"><MessageCircleIcon className="size-3 text-blue-500"/> Messenger</span>
+                  <span className="font-semibold text-foreground">{messengerPercent}%</span>
+                </div>
+                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${messengerPercent}%` }} />
+                </div>
+              </div>
+            )}
           </div>
         </section>
       </div>

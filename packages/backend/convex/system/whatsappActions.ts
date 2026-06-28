@@ -26,18 +26,6 @@ type WhatsAppConversation = {
   status: "unresolved" | "resolved" | "escalated";
 };
 
-function getStatusReply(status: WhatsAppConversation["status"]) {
-  if (status === "resolved") {
-    return "I've marked this conversation as resolved. If you need anything else, you can start a new chat anytime.";
-  }
-
-  if (status === "escalated") {
-    return "I've connected you with our support team. A team member will follow up here soon.";
-  }
-
-  return "Thanks for your message. How can I help you today?";
-}
-
 export const handleIncomingMessage = internalAction({
   args: {
     phoneNumberId: v.string(),
@@ -78,6 +66,7 @@ export const handleIncomingMessage = internalAction({
 
     if (conversation.status === "unresolved") {
       try {
+        // Use `prompt` so the agent properly tracks the user message and tool loop natively.
         const result = await supportAgent.generateText(
           ctx,
           {
@@ -95,26 +84,100 @@ export const handleIncomingMessage = internalAction({
 
         reply = result.text?.trim() || null;
 
+        // If result.text is empty, check the database. 
+        // This happens if a tool was called (like search) and the agent either output no text 
+        // or a different status was reached.
         if (!reply) {
           const updatedConversation = await ctx.runQuery(
             internal.system.conversations.getByThreadId,
             { threadId: conversation.threadId }
           ) as WhatsAppConversation | null;
 
-          reply = getStatusReply(updatedConversation?.status ?? conversation.status);
+          const updatedStatus = updatedConversation?.status ?? conversation.status;
+
+          if (updatedStatus === "unresolved") {
+            // Find the most recent assistant message generated during this execution
+            const lastMessages = await ctx.runQuery(components.agent.messages.listMessagesByThreadId, {
+              threadId: conversation.threadId,
+              order: "desc",
+              paginationOpts: { numItems: 5, cursor: null },
+            });
+            const newestAssistant = lastMessages?.page?.find(
+              (m: any) => (m.message?.role ?? m.role) === "assistant" && m.status !== "pending"
+            );
+
+            if (newestAssistant && newestAssistant.message?.content) {
+              // Agent wrote to DB directly (e.g. via tool loop output) but text was empty on the return object
+              const content = newestAssistant.message.content;
+              if (typeof content === "string") {
+                reply = content;
+              } else if (Array.isArray(content)) {
+                const textPart = content.find((p: any) => p.type === "text") as { text: string } | undefined;
+                reply = textPart?.text || "Thanks for your message. How can I help you today?";
+              } else {
+                reply = "Thanks for your message. How can I help you today?";
+              }
+            } else {
+              // Truly empty reply, no DB message found either
+              reply = "Thanks for your message. How can I help you today?";
+            }
+          } else {
+            // Tool was called (resolved/escalated) — tool already wrote the message, skip reply
+            reply = null;
+          }
         }
       } catch (error) {
         console.error("WhatsApp support agent generation failed:", error);
-        await saveMessage(ctx, components.agent, {
-          threadId: conversation.threadId,
-          message: {
-            role: "assistant",
-            content: TEMPORARY_AI_ERROR_MESSAGE,
-          },
-        });
+
+        // Smart recovery: check if the agent managed to save the user message before failing
+        const lastMessages = await ctx.runQuery(
+          components.agent.messages.listMessagesByThreadId,
+          {
+            threadId: conversation.threadId,
+            order: "desc",
+            paginationOpts: { numItems: 2, cursor: null },
+          }
+        );
+        const messages = lastMessages?.page ?? [];
+
+        const userMessageSaved = messages.some(
+          (m: any) =>
+            (m.message?.role ?? m.role) === "user" &&
+            ((m.message?.content ?? m.text) === args.text)
+        );
+
+        if (!userMessageSaved) {
+          await saveMessage(ctx, components.agent, {
+            threadId: conversation.threadId,
+            message: { role: "user", content: args.text },
+          });
+        }
+
+        const latestMessage = messages[0];
+        if (latestMessage && latestMessage.status === "failed") {
+          await ctx.runMutation(components.agent.messages.updateMessage, {
+            messageId: latestMessage._id,
+            patch: {
+              status: "success",
+              message: {
+                role: "assistant",
+                content: TEMPORARY_AI_ERROR_MESSAGE,
+              },
+            },
+          });
+        } else {
+          await saveMessage(ctx, components.agent, {
+            threadId: conversation.threadId,
+            message: {
+              role: "assistant",
+              content: TEMPORARY_AI_ERROR_MESSAGE,
+            },
+          });
+        }
         reply = TEMPORARY_AI_ERROR_MESSAGE;
       }
     } else {
+      // Conversation is escalated — just save the user message, no AI reply
       await saveMessage(ctx, components.agent, {
         threadId: conversation.threadId,
         message: {

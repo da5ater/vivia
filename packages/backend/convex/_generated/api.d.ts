@@ -34,6 +34,8 @@ import type * as public_conversations from "../public/conversations.js";
 import type * as public_messages from "../public/messages.js";
 import type * as public_secrets from "../public/secrets.js";
 import type * as public_widgetSettings from "../public/widgetSettings.js";
+import type * as scratch_testAllKeys from "../scratch/testAllKeys.js";
+import type * as scratch_testTimeout from "../scratch/testTimeout.js";
 import type * as summarize from "../summarize.js";
 import type * as system_ai_agents_supportAgent from "../system/ai/agents/supportAgent.js";
 import type * as system_ai_constants from "../system/ai/constants.js";
@@ -86,6 +88,8 @@ declare const fullApi: ApiFromModules<{
   "public/messages": typeof public_messages;
   "public/secrets": typeof public_secrets;
   "public/widgetSettings": typeof public_widgetSettings;
+  "scratch/testAllKeys": typeof scratch_testAllKeys;
+  "scratch/testTimeout": typeof scratch_testTimeout;
   summarize: typeof summarize;
   "system/ai/agents/supportAgent": typeof system_ai_agents_supportAgent;
   "system/ai/constants": typeof system_ai_constants;

@@ -149,11 +149,38 @@ export const ensureConversationForSender = internalMutation({
       });
 
       session = await ctx.db.get(sessionId);
-    } else if (session.expiresAt < now) {
-      await ctx.db.patch(session._id, {
-        expiresAt: now + SESSION_DURATION_MS,
-      });
-      session = await ctx.db.get(session._id);
+    } else {
+      const updates: Record<string, any> = {};
+      let changed = false;
+
+      if (session.expiresAt < now) {
+        updates.expiresAt = now + SESSION_DURATION_MS;
+        changed = true;
+      }
+
+      // BUG 10 FIX: Update profile name if a real name arrived but the session was stored without one.
+      // Previously WhatsApp never updated profile names on re-contact (unlike the Messenger channel).
+      let sessionMetadataChanged = false;
+      const metadata = { ...(session.metadata ?? {}) };
+
+      if (
+        profileName &&
+        (session.name === `WhatsApp ${from}` || !metadata.whatsappName)
+      ) {
+        updates.name = profileName;
+        metadata.whatsappName = profileName;
+        sessionMetadataChanged = true;
+      }
+
+      if (sessionMetadataChanged) {
+        updates.metadata = metadata;
+        changed = true;
+      }
+
+      if (changed) {
+        await ctx.db.patch(session._id, updates);
+        session = await ctx.db.get(session._id);
+      }
     }
 
     if (!session) {

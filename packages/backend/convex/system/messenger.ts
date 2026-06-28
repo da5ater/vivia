@@ -121,8 +121,9 @@ export const ensureConversationForSender = internalMutation({
     organizationId: v.id("users"),
     from: v.string(),
     profileName: v.optional(v.string()),
+    avatarUrl: v.optional(v.string()),
   },
-  handler: async (ctx, { organizationId, from, profileName }) => {
+  handler: async (ctx, { organizationId, from, profileName, avatarUrl }) => {
     const email = messengerEmail(from);
     const now = Date.now();
 
@@ -145,6 +146,7 @@ export const ensureConversationForSender = internalMutation({
           platform: "messenger",
           messengerId: from,
           messengerName: profileName,
+          avatarUrl: avatarUrl,
         },
       });
 
@@ -158,16 +160,26 @@ export const ensureConversationForSender = internalMutation({
         changed = true;
       }
 
-      // If we got a real profileName now but the session was previously stored with the ID fallback name
+      // If we got a real profileName/avatarUrl now but the session was previously stored without them
+      let sessionMetadataChanged = false;
+      const metadata = { ...(session.metadata ?? {}) };
+
       if (
         profileName &&
-        (session.name === `Messenger ${from}` || !session.metadata?.messengerName)
+        (session.name === `Messenger ${from}` || !metadata.messengerName)
       ) {
         updates.name = profileName;
-        updates.metadata = {
-          ...(session.metadata ?? {}),
-          messengerName: profileName,
-        };
+        metadata.messengerName = profileName;
+        sessionMetadataChanged = true;
+      }
+
+      if (avatarUrl && metadata.avatarUrl !== avatarUrl) {
+        metadata.avatarUrl = avatarUrl;
+        sessionMetadataChanged = true;
+      }
+
+      if (sessionMetadataChanged) {
+        updates.metadata = metadata;
         changed = true;
       }
 

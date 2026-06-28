@@ -10,10 +10,11 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "src"
+    "convex"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "convex/scratch"
   ]
 }

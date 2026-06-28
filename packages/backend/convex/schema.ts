@@ -92,6 +92,7 @@ const schema = defineSchema({
         whatsappName: v.optional(v.string()),
         messengerId: v.optional(v.string()),
         messengerName: v.optional(v.string()),
+        avatarUrl: v.optional(v.string()),
       })
     ),
   })

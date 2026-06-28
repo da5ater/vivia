@@ -21,4 +21,14 @@ export const supportAgent = new Agent(components.agent, {
     resolveConversation,
     search,
   },
+  stopWhen: (args) => {
+    if (args.steps.length >= 15) return true;
+    const lastStep = args.steps.at(-1);
+    if (!lastStep) return false;
+    return lastStep.toolCalls.some(
+      (tc: any) =>
+        tc.toolName === "resolveConversation" ||
+        tc.toolName === "escalateConversation"
+    );
+  },
 });

@@ -45,6 +45,7 @@ export const create = action({
     if (conversation.status === "unresolved") {
       await ctx.runMutation(internal.system.conversations.escalate, {
         threadId: conversation.threadId,
+        silent: true,
       });
     }
 
@@ -138,7 +139,26 @@ export const getMany = query({
       throw new ConvexError("Conversation not found");
     }
 
-    return await supportAgent.listMessages(ctx, { threadId, paginationOpts });
+    const result = await supportAgent.listMessages(ctx, { threadId, paginationOpts });
+
+    const mappedMessages = result.page.map((msg: any) => {
+      if (msg.status === "pending") {
+        return {
+          ...msg,
+          message: {
+            role: "assistant",
+            content: "...",
+          },
+          text: "...",
+        };
+      }
+      return msg;
+    });
+
+    return {
+      ...result,
+      page: mappedMessages,
+    };
   },
 });
 
@@ -172,7 +192,14 @@ export const enhanceResponse = action({
     });
 
     // 3. Return the text directly (Action does not write to DB)
-    return response.text;
+    let enhancedText = response.text.trim();
+    if (
+      (enhancedText.startsWith('"') && enhancedText.endsWith('"')) ||
+      (enhancedText.startsWith("'") && enhancedText.endsWith("'"))
+    ) {
+      enhancedText = enhancedText.slice(1, -1).trim();
+    }
+    return enhancedText;
     } catch (error) {
       console.error("Error enhancing response:", error);
       throw new ConvexError("Failed to enhance response. The AI service might be temporarily unavailable.");

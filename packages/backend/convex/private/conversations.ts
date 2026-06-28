@@ -2,8 +2,10 @@ import { mutation, query, QueryCtx, MutationCtx } from "../_generated/server.js"
 import { ConvexError, v } from "convex/values";
 import { supportAgent } from "../system/ai/agents/supportAgent.js";
 import { paginationOptsValidator, PaginationResult } from "convex/server";
-import { MessageDoc } from "@convex-dev/agent";
+import { MessageDoc, saveMessage } from "@convex-dev/agent";
 import { Doc } from "../_generated/dataModel.js";
+import { components, internal } from "../_generated/api.js";
+
 
 async function requireCurrentUser(ctx: QueryCtx | MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
@@ -138,7 +140,7 @@ export const getOne = query({
   },
 });
 
-import { internal } from "../_generated/api.js";
+
 
 export const updateStatus = mutation({
   args: {
@@ -172,6 +174,26 @@ export const updateStatus = mutation({
 
     await ctx.db.patch(conversationId, { status });
 
+    // BUG 6 FIX: Save a closure message when status is manually changed by an operator.
+    // Previously this path wrote no message, so the thread was inconsistent with AI-tool-driven flows.
+    if (status === "resolved") {
+      await saveMessage(ctx, components.agent, {
+        threadId: conversation.threadId,
+        message: {
+          role: "assistant",
+          content: "This conversation has been marked as resolved by the support team.",
+        },
+      });
+    } else if (status === "escalated") {
+      await saveMessage(ctx, components.agent, {
+        threadId: conversation.threadId,
+        message: {
+          role: "assistant",
+          content: "This conversation has been escalated to the support team. A team member will follow up shortly.",
+        },
+      });
+    }
+
     if (status === "resolved" || status === "escalated") {
       await ctx.scheduler.runAfter(
         0,
@@ -201,14 +223,31 @@ export const getStats = query({
     let resolved = 0;
     let escalated = 0;
 
+    const channelStats = { web: 0, whatsapp: 0, messenger: 0 };
+    const countryStats: Record<string, number> = {};
+
     for (const conv of conversations) {
       total++;
       if (conv.status === "unresolved") unresolved++;
       if (conv.status === "resolved") resolved++;
       if (conv.status === "escalated") escalated++;
+
+      const contactSession = await ctx.db.get(conv.contactSessionId);
+      if (contactSession && contactSession.metadata) {
+        const meta = contactSession.metadata;
+        if (meta.whatsappFrom) channelStats.whatsapp++;
+        else if (meta.messengerId) channelStats.messenger++;
+        else channelStats.web++;
+
+        if (meta.timezone) {
+          countryStats[meta.timezone] = (countryStats[meta.timezone] || 0) + 1;
+        }
+      } else {
+        channelStats.web++;
+      }
     }
 
-    return { total, unresolved, resolved, escalated };
+    return { total, unresolved, resolved, escalated, channelStats, countryStats };
   },
 });
 

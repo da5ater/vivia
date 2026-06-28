@@ -41,9 +41,9 @@ export const search = createTool({
             .filter((t) => t !== null)
             .join(", ");
 
-        const contextText = `   
-        Found results in: ${titles} 
-        Here is the context:${searchResults.text}`;
+        // BUG 8 FIX: Removed stray `"` character and fixed whitespace-heavy indentation
+        // in the context text template literal which was polluting the prompt.
+        const contextText = `Found results in: ${titles}\n\nHere is the context:\n${searchResults.text}`;
 
         const response = await generateText({
             model: getModel("interpreter") as LanguageModel,
@@ -54,17 +54,7 @@ export const search = createTool({
                 },
                 {
                     role: "user",
-                    content: `User asked:${query} "\n\n Search results:${contextText}`,
-                },
-            ],
-        });
-
-        await supportAgent.saveMessages(ctx, {
-            threadId: ctx.threadId,
-            messages: [
-                {
-                    role: "assistant",
-                    content: response.text,
+                    content: `User asked: ${query}\n\nSearch results:\n${contextText}`,
                 },
             ],
         });
@@ -72,5 +62,3 @@ export const search = createTool({
         return response.text;
     },
 });
-
-

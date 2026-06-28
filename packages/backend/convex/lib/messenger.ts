@@ -90,7 +90,7 @@ export async function fetchMessengerProfile(args: {
   accessToken: string;
 }) {
   const response = await fetch(
-    `https://graph.facebook.com/${MESSENGER_API_VERSION}/${args.psid}?fields=first_name,last_name&access_token=${encodeURIComponent(args.accessToken)}`,
+    `https://graph.facebook.com/${MESSENGER_API_VERSION}/${args.psid}?fields=first_name,last_name,profile_pic&access_token=${encodeURIComponent(args.accessToken)}`,
   );
 
   if (!response.ok) {
@@ -98,11 +98,17 @@ export async function fetchMessengerProfile(args: {
     return null;
   }
 
-  const data = (await response.json()) as { first_name?: string; last_name?: string };
-  if (data.first_name || data.last_name) {
-    return [data.first_name, data.last_name].filter(Boolean).join(" ");
-  }
-  return null;
+  const data = (await response.json()) as {
+    first_name?: string;
+    last_name?: string;
+    profile_pic?: string;
+  };
+  
+  const name = [data.first_name, data.last_name].filter(Boolean).join(" ");
+  return {
+    name: name || undefined,
+    profilePic: data.profile_pic || undefined,
+  };
 }
 
 /**

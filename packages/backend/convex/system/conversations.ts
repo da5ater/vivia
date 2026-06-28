@@ -93,8 +93,9 @@ export const escalate = internalMutation({
   args: {
     threadId: v.string(),
     customerMessage: v.optional(v.string()),
+    silent: v.optional(v.boolean()),
   },
-  handler: async (ctx, { threadId, customerMessage }) => {
+  handler: async (ctx, { threadId, customerMessage, silent }) => {
     const conversation = await ctx.db
       .query("conversations")
       .withIndex("byThreadId", (q) => q.eq("threadId", threadId))
@@ -106,15 +107,18 @@ export const escalate = internalMutation({
 
     if (conversation.status !== "escalated") {
       await ctx.db.patch(conversation._id, { status: "escalated" });
-      await saveMessage(ctx, components.agent, {
-        threadId,
-        message: {
-          role: "assistant",
-          content:
-            customerMessage ??
-            "I've connected you with our support team. A team member will follow up here soon.",
-        },
-      });
+      
+      if (!silent) {
+        await saveMessage(ctx, components.agent, {
+          threadId,
+          message: {
+            role: "assistant",
+            content:
+              customerMessage ??
+              "I've connected you with our support team. A team member will follow up here soon.",
+          },
+        });
+      }
 
       await ctx.scheduler.runAfter(
         0,
